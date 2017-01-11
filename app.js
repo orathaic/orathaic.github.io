@@ -3,8 +3,8 @@ angular.module('EcoSim', [])
 	.controller('Controller', ["$scope", "$timeout", function ($scope, $timeout) 
 		{	
 			$scope.CreatureType = 'green';
-			var Creature = function (x,y) {
-				this.Type = $scope.CreatureType; 
+			var Creature = function (x,y,type) {
+				this.Type = type;  
 				this.Energy = 9;
 				this.x = x; this.y = y;
 			};
@@ -16,19 +16,20 @@ angular.module('EcoSim', [])
 				{ //console.log('Eating...', Prey.x, this.x);
 					if( Math.abs(Prey.x - that.x) < 2 && Math.abs(Prey.y - that.y) < 2 && !angular.equals(Prey,that) ) // make into a vector distance later	
 					{ Prey.Die(i); that.Energy += 9; }
+					else if( that.Type == 'green') {that.Energy += 4; }
 				});
 			};
 			Creature.prototype.Die = function(i) { $scope.Creatures.splice(i,1); };
 			Creature.prototype.Reproduce = function() { if(this.Energy > 10) 
 				{
-				AddCreature(this.x+Math.random() * 4 - 2, this.y+Math.random() * 4 - 2 ); 
+				AddCreature(this.x+Math.random() * 4 - 2, this.y+Math.random() * 4 - 2 ,this.Type); 
 				this.Energy -=10; 
 				}
 			}; 
 
 
-			var AddCreature = function (x,y) {
-				var myCreature = new Creature(x,y);  
+			var AddCreature = function (x,y,type) {
+				var myCreature = new Creature(x,y,type);  
 				$scope.Creatures.push(myCreature);
 			}
 			$scope.Creatures = [];
@@ -42,7 +43,16 @@ angular.module('EcoSim', [])
 					});
 
 					$scope.Promise = $timeout(Run, 10);
+					$scope.Status = 'Running...';
 				}
+
+			function Pause() {
+
+					$timeout.cancel($scope.Promise);
+					$scope.Status = 'Paused.';
+										
+				}
+
 			//C.Run = function() {};
 	
 			$scope.HandleKeypress = function (e) 
@@ -53,12 +63,13 @@ angular.module('EcoSim', [])
 					case 71: $scope.CreatureType = 'green'; break;//g(reen)
 					case 66: $scope.CreatureType = 'blue'; break;//b(lue)
 					case 88: Run(); break;// x
-					case 90: $timeout.cancel($scope.Promise); break;
-					default: console.log('pressed a boring key');
+					case 80: // p					
+					case 90: Pause(); break;
+					default: console.log('pressed a boring key: '+e.which);
 				} 
 			 
 			};	
-			$scope.HandleClick = function (e) { AddCreature(e.x + window.scrollX, e.y + window.scrollY); }	
+			$scope.HandleClick = function (e) { AddCreature(e.x + window.scrollX, e.y + window.scrollY, $scope.CreatureType); }	
 		}
 	])
 	.directive('mykeypress', [function ()
