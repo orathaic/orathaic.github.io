@@ -118,7 +118,7 @@ class Plant extends Creature {
 			this.community.filter(
             candidate => candidate != this && this.distanceTo(candidate) < 12 && candidate.type == 'green'
         	).forEach(competition => {
-            this.energy -= 0.1
+            this.energy -= 0.11
         })
 
 	}
