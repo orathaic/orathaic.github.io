@@ -10,7 +10,7 @@
 
 </style>
 <script>
-
+"use strict";
 class Creature {
     constructor (community,type,x,y,birthmark) {
         if (['green','red','blue'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Creature type`)
@@ -36,6 +36,10 @@ class Creature {
         this.eat()
         this.reproduce()
     }
+
+	distanceTo (target) {
+		return Math.sqrt(Math.pow(Math.abs(target.x - this.x),2) + Math.pow(Math.abs(target.y - this.y),2)) //euclidean distance
+	}
     move () {
         if (this.energy > 0) {
             this.x += Math.random() * (2) - 1
@@ -51,7 +55,7 @@ class Creature {
     }
     eat () {
         this.community.filter(
-            candidate => candidate != this && Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2
+            candidate => candidate != this && Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2 && candidate.type != this.type
         ).forEach(prey => {
             prey.die()
             this.energy += 9
@@ -97,30 +101,67 @@ class Creature {
     }
     ///////////////////////////////////////////////
 }
-Creature.all = []
 
-let mainCommunity = []
-for (i = 0; i < 700; i++) {
-//setInterval(() => new Creature(
-    new
- Creature(
-        mainCommunity
-       ,['red','green','blue'][Math.floor(Math.random()*3)]
-       ,500*Math.random()
-       ,500*Math.random()
-    )//, 400)
+class Plant extends Creature {
+    constructor (community,type,x,y,birthmark) {
+        if (['green'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Plant-Creature type`)
+		
+		super(community,type,x,y,birthmark)
+
+        this.energy = 4
+
+//        community.push(this)
+    }
+
+    eat () {
+			this.energy +=0.5; // mmm solar power
+			this.community.filter(
+            candidate => candidate != this && this.distanceTo(candidate) < 12 && candidate.type == 'green'
+        	).forEach(competition => {
+            this.energy -= 0.1
+        })
+
+	}
+
+    move () {
+        if (this.energy < -10) {
+            this.die()
+        }
+    }
+    reproduce () {
+        if (this.energy > 10) { 
+			{if(Math.random() * 100 > 0.5) 
+	            new Plant(this.community,this.type,this.x+(Math.random() - 0.5 )*24,this.y+(Math.random() - 0.5)*24,this.energy)
+			else new Creature (this.community,"blue",this.x+(Math.random() - 0.5 )*24,this.y+(Math.random() - 0.5)*24,this.energy)
+			}            
+			this.energy -= 10
+        }
+	}
+
 }
 
-Canvas = {};
+let mainCommunity = []
+
+for (var i = 0; i < 7; i++) {
+    new Plant(
+        mainCommunity
+       	//,['red','green','blue'][Math.floor(Math.random()*3)]
+		,'green'
+       	,500*Math.random()
+       	,500*Math.random()
+    )
+}
+
+var Canvas = {};
 Canvas.Empty = function ()
-{ that = document.body;
+{ var that = document.body;
 	while (that.firstChild) {
 	  that.removeChild(that.firstChild);
 	}
 }
 Canvas.Append = function (docFragment)
 {
-	that = document.body;
+	var that = document.body;
 	that.appendChild(docFragment);
 }
 
@@ -134,17 +175,23 @@ Canvas.redraw = function (Creatures) {
 	Canvas.Append(docFragment);
 }
 
-Canvas.go = function() {setInterval(() => {
+Canvas.go = function() { this.Interval = setInterval(() => {
     mainCommunity.forEach(creature => creature.step())
 	Canvas.redraw(mainCommunity);
-	//    document.body.textContent = mainCommunity.sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
-	},1000/60)
+//	    document.body.textContent = mainCommunity.sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
+	},1000/45)
 }
 
-setInterval(() => {
-    mainCommunity.forEach(creature => creature.step())
-	Canvas.redraw(mainCommunity);
-	//    document.body.textContent = mainCommunity.sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
-	},1000/60)
+Canvas.stop = function() { clearInterval(this.Interval)
+}
+
+//document.addEventListener("keypress", HandleKeyPress());
+document.onkeypress = function() { 
+		switch(event.which) { 
+		case 103: Canvas.go(); break;
+		case 115: Canvas.stop(); break;
+		default:
+		}
+};
 
 </script>
