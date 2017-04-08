@@ -38,12 +38,12 @@ class Creature {
     }
 
 	distanceTo (target) {
-		return Math.sqrt(Math.pow(Math.abs(target.x - this.x),2) + Math.pow(Math.abs(target.y - this.y),2)) //euclidean distance
+		return (Math.pow(Math.abs(target.x - this.x),2) + Math.pow(Math.abs(target.y - this.y),2)) //euclidean distance squared
 	}
     move () {
         if (this.energy > 0) {
-            this.x += Math.random() * (2) - 1
-            this.y += Math.random() * (2) - 1
+            this.x += ( Math.random() - 0.5 ) * (4)
+            this.y += ( Math.random() - 0.5 ) * (4)
             this.energy -= 0.1
         } 
         else {
@@ -55,14 +55,14 @@ class Creature {
     }
     eat () {
         this.community.filter(
-            candidate => candidate != this && Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2 && candidate.type != this.type
+            candidate => Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2 && candidate.type != this.type &&  candidate != this
         ).forEach(prey => {
             prey.die()
             this.energy += 9
         })
     }
     die () {
-        let index = this.community.indexOf(this)
+        var index = this.community.indexOf(this)
         if (index >= 0) {
             this.community.splice(index,1)
         }
@@ -116,7 +116,7 @@ class Plant extends Creature {
     eat () {
 			this.energy +=0.5; // mmm solar power
 			this.community.filter(
-            candidate => candidate != this && this.distanceTo(candidate) < 12 && candidate.type == 'green'
+            candidate => Math.abs(candidate.x - this.x) < 12 && Math.abs(candidate.y - this.y) < 12 && candidate.type == 'green' && this.distanceTo(candidate) < 144 && candidate != this
         	).forEach(competition => {
             this.energy -= 0.11
         })
@@ -129,7 +129,7 @@ class Plant extends Creature {
         }
     }
     reproduce () {
-        if (this.energy > 10) { 
+        if (this.energy > 12) { 
 			{if(Math.random() * 100 > 0.5) 
 	            new Plant(this.community,this.type,this.x+(Math.random() - 0.5 )*24,this.y+(Math.random() - 0.5)*24,this.energy)
 			else new Creature (this.community,"blue",this.x+(Math.random() - 0.5 )*24,this.y+(Math.random() - 0.5)*24,this.energy)
@@ -140,7 +140,7 @@ class Plant extends Creature {
 
 }
 
-let mainCommunity = []
+var mainCommunity = []
 
 for (var i = 0; i < 7; i++) {
     new Plant(
@@ -167,7 +167,7 @@ Canvas.Append = function (docFragment)
 
 Canvas.redraw = function (Creatures) {
 	var docFragment = document.createDocumentFragment();
-	for(var i =0; i < Creatures.length; i++)
+	for(var i =0, l =Creatures.length; i < l; i++)
 	 {
 	  docFragment = Creatures[i].Draw(docFragment, i);  // (To add conditional statement for drawing only inside the canvas boundaries)
 	 }
@@ -177,12 +177,16 @@ Canvas.redraw = function (Creatures) {
 
 Canvas.go = function() { this.Interval = setInterval(() => {
     mainCommunity.forEach(creature => creature.step())
+	},1000/60)
+
+	this.ReDrawInterval = setInterval(() => {
 	Canvas.redraw(mainCommunity);
 //	    document.body.textContent = mainCommunity.sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
-	},1000/45)
+	},1000/10)
 }
 
 Canvas.stop = function() { clearInterval(this.Interval)
+							clearInterval(this.ReDrawInterval)
 }
 
 //document.addEventListener("keypress", HandleKeyPress());
