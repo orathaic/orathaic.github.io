@@ -25,13 +25,13 @@ class Creature {
 
         this.energy = 9
 
-        community.push(this)
+//        community.Creatures.push(this)
     }
 
     ///////////////////////////////////////////////
     // Creature-Oriented //////////////////////////
     ///////////////////////////////////////////////
-    step () {
+    step () { 
         this.move()
         this.eat()
         this.reproduce()
@@ -40,49 +40,12 @@ class Creature {
 	distanceTo (target) {
 		return (Math.pow(Math.abs(target.x - this.x),2) + Math.pow(Math.abs(target.y - this.y),2)) //euclidean distance squared
 	}
-    move () {
-        if (this.energy > 0) {
-            this.x += ( Math.random() - 0.5 ) * (4)
-            this.y += ( Math.random() - 0.5 ) * (4)
-            this.energy -= 0.1
-        } 
-        else {
-            this.energy -= 0.01
-        }
-        if (this.energy < -10) {
-            this.die()
-        }
-    }
-    eat () {
-        this.community.filter(
-            candidate => Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2 && candidate.type != this.type &&  candidate != this
-        ).forEach(prey => {
-            prey.die()
-            this.energy += 9
-        })
-    }
-    die () {
-        var index = this.community.indexOf(this)
-        if (index >= 0) {
-            this.community.splice(index,1)
-        }
-        else {
-            throw new Error('Creature community corruption error.')
-        }
-    }
-    reproduce () {
-        if (this.energy > 10) {
-            new Creature(this.community,this.type,this.x+Math.random()*4-2,this.y+Math.random()*4-2,this.energy)
-            this.energy -= 10
-        }
-    }
-
 	Draw (Fragment, i) {
 		var ToAdd = document.createElement("div");
 		ToAdd.id = 'Creature'+i;
 		ToAdd.className = 'Creature '+this.type;
-		ToAdd.style.top = this.y+'px';
-		ToAdd.style.left = this.x+'px';
+		ToAdd.style.top = (this.y-this.energy/2)+'px';
+		ToAdd.style.left = (this.x-this.energy/2)+'px';
 		ToAdd.style.width = this.energy+'px';
 		ToAdd.style.height = this.energy+'px';
 
@@ -101,6 +64,112 @@ class Creature {
     }
     ///////////////////////////////////////////////
 }
+class Carnivore extends Creature {
+    constructor (community,type,x,y,birthmark) {
+        if (['red'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Carnivore-Creature type`)
+		
+		super(community,type,x,y,birthmark)
+        this.energy = 4
+
+        community.Carnivores.push(this)
+
+	}
+    move () {
+        if (this.energy > 0) {
+            this.x += Math.round(( Math.random() - 0.5 ) * (10))
+            this.y += Math.round(( Math.random() - 0.5 ) * (10))
+            this.energy -= 0.1
+        } 
+        else {
+            this.energy -= 0.1
+        }
+        if (this.energy < -10) {
+            this.die()
+        }
+    }
+
+
+    eat () {
+        this.community.Herbis.filter(
+            candidate => Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2
+        ).forEach(prey => {
+            prey.die()
+            this.energy += 9
+        })
+    }
+    reproduce () {
+        if (this.energy > 10) {
+            new Carnivore(this.community,this.type,Math.floor(this.x+Math.random()*4-2),Math.floor(this.y+Math.random()*4-2),this.energy)
+            this.energy -= 10
+        }
+    }
+    die () {
+        var index = this.community.Carnivores.indexOf(this)
+        if (index >= 0) {
+            this.community.Carnivores.splice(index,1)
+        }
+        else {
+            throw new Error('Creature community corruption error.')
+        }
+    }
+
+}
+
+class Herbi extends Creature {
+    constructor (community,type,x,y,birthmark) {
+        if (['blue'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Herbi-Creature type`)
+		
+		super(community,type,x,y,birthmark)
+        this.energy = 4
+
+        community.Herbis.push(this)
+
+	}
+    move () {
+        if (this.energy > 0) {
+            this.x += Math.round(( Math.random() - 0.5 ) * (10))
+            this.y += Math.round(( Math.random() - 0.5 ) * (10))
+            this.energy -= 0.1
+        } 
+        else {
+            this.energy -= 0.1
+        }
+        if (this.energy < -10) {
+            this.die()
+        }
+    }
+
+
+    eat () {
+        this.community.Plants.filter(
+            candidate => Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2
+        ).forEach(prey => {
+            prey.die()
+            this.energy += 9
+        })
+    }
+    reproduce () {
+        if (this.energy > 10) {
+			if(Math.random() * 100 > 0.2) {
+            new Herbi(this.community,this.type,Math.floor(this.x+Math.random()*4-2),Math.floor(this.y+Math.random()*4-2),this.energy)
+            this.energy -= 10
+			}
+			else {new Carnivore(this.community,"red",Math.floor(this.x+Math.random()*4-2),Math.floor(this.y+Math.random()*4-2),this.energy)
+			console.log('evolving into a carnivore')			
+			}
+        }
+    }
+    die () {
+        var index = this.community.Herbis.indexOf(this)
+        if (index >= 0) {
+            this.community.Herbis.splice(index,1)
+        }
+        else {
+            throw new Error('Creature community corruption error.')
+        }
+    }
+
+}
 
 class Plant extends Creature {
     constructor (community,type,x,y,birthmark) {
@@ -110,17 +179,16 @@ class Plant extends Creature {
 
         this.energy = 4
 
-//        community.push(this)
+        community.Plants.push(this)
     }
 
     eat () {
 			this.energy +=0.5; // mmm solar power
-			this.community.filter(
-            candidate => Math.abs(candidate.x - this.x) < 12 && Math.abs(candidate.y - this.y) < 12 && candidate.type == 'green' && this.distanceTo(candidate) < 144 && candidate != this
+			this.community.Plants.filter(
+            candidate => Math.abs(candidate.x - this.x) < 12 && Math.abs(candidate.y - this.y) < 12 && this.distanceTo(candidate) < 144 && candidate != this
         	).forEach(competition => {
             this.energy -= 0.11
         })
-
 	}
 
     move () {
@@ -131,24 +199,34 @@ class Plant extends Creature {
     reproduce () {
         if (this.energy > 12) { 
 			{if(Math.random() * 100 > 0.5) 
-	            new Plant(this.community,this.type,this.x+(Math.random() - 0.5 )*24,this.y+(Math.random() - 0.5)*24,this.energy)
-			else new Creature (this.community,"blue",this.x+(Math.random() - 0.5 )*24,this.y+(Math.random() - 0.5)*24,this.energy)
+	            new Plant(this.community,this.type,Math.round(this.x+(Math.random() - 0.5 )*36),Math.floor(this.y+(Math.random() - 0.5)*24),this.energy)
+			else new Herbi (this.community,"blue",Math.round(this.x+(Math.random() - 0.5 )*36),Math.floor(this.y+(Math.random() - 0.5)*24),this.energy)
 			}            
 			this.energy -= 10
         }
 	}
+    die () {
+        var index = this.community.Plants.indexOf(this)
+        if (index >= 0) {
+            this.community.Plants.splice(index,1)
+        }
+        else {
+            throw new Error('Creature community corruption error.')
+        }
+    }
 
 }
 
-var mainCommunity = []
+var mainCommunity = {Plants:[], Herbis:[], Carnivores:[]}
+	mainCommunity.getCreatures = function() {return this.Plants.concat(this.Herbis).concat(this.Carnivores)}
 
 for (var i = 0; i < 7; i++) {
     new Plant(
         mainCommunity
        	//,['red','green','blue'][Math.floor(Math.random()*3)]
 		,'green'
-       	,500*Math.random()
-       	,500*Math.random()
+       	,Math.floor(500*Math.random())+50
+       	,Math.floor(500*Math.random())+50
     )
 }
 
@@ -176,13 +254,13 @@ Canvas.redraw = function (Creatures) {
 }
 
 Canvas.go = function() { this.Interval = setInterval(() => {
-    mainCommunity.forEach(creature => creature.step())
+    mainCommunity.getCreatures().forEach(creature => creature.step())
 	},1000/60)
 
 	this.ReDrawInterval = setInterval(() => {
-	Canvas.redraw(mainCommunity);
-//	    document.body.textContent = mainCommunity.sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
-	},1000/10)
+	Canvas.redraw( mainCommunity.getCreatures() );
+//	    document.body.textContent = mainCommunity.Plants.concat(mainCommunity.Herbis).sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
+	},1000/5)
 }
 
 Canvas.stop = function() { clearInterval(this.Interval)
