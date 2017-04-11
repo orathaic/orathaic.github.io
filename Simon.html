@@ -35,8 +35,14 @@ class Creature {
         this.move()
         this.eat()
         this.reproduce()
+		this.boundTest()
     }
 
+	boundTest ()
+	{
+		if(this.x > 250 || this.x < 50 || this.y > 250 || this.y < 50)
+		this.die()
+	}
 	distanceTo (target) {
 		return (Math.pow(Math.abs(target.x - this.x),2) + Math.pow(Math.abs(target.y - this.y),2)) //euclidean distance squared
 	}
@@ -150,7 +156,7 @@ class Herbi extends Creature {
     }
     reproduce () {
         if (this.energy > 10) {
-			if(Math.random() * 100 > 0.2) {
+			if(Math.random() * 100 > 0.05) {
             new Herbi(this.community,this.type,Math.floor(this.x+Math.random()*4-2),Math.floor(this.y+Math.random()*4-2),this.energy)
             this.energy -= 10
 			}
@@ -197,7 +203,7 @@ class Plant extends Creature {
     }
     reproduce () {
         if (this.energy > 12) { 
-			{if(Math.random() * 100 > 0.5) 
+			{if(Math.random() * 100 > 0.1) 
 	            new Plant(this.community,this.type,Math.round(this.x+(Math.random() - 0.5 )*36),Math.floor(this.y+(Math.random() - 0.5)*24),this.energy)
 			else new Herbi (this.community,"blue",Math.round(this.x+(Math.random() - 0.5 )*36),Math.floor(this.y+(Math.random() - 0.5)*24),this.energy)
 			}            
@@ -224,12 +230,13 @@ for (var i = 0; i < 7; i++) {
         mainCommunity
        	//,['red','green','blue'][Math.floor(Math.random()*3)]
 		,'green'
-       	,Math.floor(500*Math.random())+50
-       	,Math.floor(500*Math.random())+50
+       	,Math.floor(250*Math.random())+50
+       	,Math.floor(250*Math.random())+50
     )
 }
 
 var Canvas = {};
+Canvas.Community = mainCommunity;
 Canvas.Empty = function ()
 { var that = document.body;
 	while (that.firstChild) {
@@ -243,28 +250,42 @@ Canvas.Append = function (docFragment)
 }
 
 Canvas.redraw = function (Creatures) {
-	var docFragment = document.createDocumentFragment();
-	for(var i =0, l =Creatures.length; i < l; i++)
-	 {
-	  docFragment = Creatures[i].Draw(docFragment, i);  // (To add conditional statement for drawing only inside the canvas boundaries)
-	 }
-	Canvas.Empty();
-	Canvas.Append(docFragment);
+	if(this.reDraw)
+	{
+		var docFragment = document.createDocumentFragment();
+		for(var i =0, l =Creatures.length; i < l; i++)
+		 {
+		  docFragment = Creatures[i].Draw(docFragment, i);  // (To add conditional statement for drawing only inside the canvas boundaries)
+		 }
+		Canvas.Empty();
+		Canvas.Append(docFragment);
+//		requestAnimationFrame(this.redraw(this.Community.getCreatures() ) );
+//		this.reDraw = false;
+	}
+
 }
 
-Canvas.go = function() { this.Interval = setInterval(() => {
+Canvas.go = function() { 
+	this.Interval = setInterval(() => {
     mainCommunity.getCreatures().forEach(creature => creature.step())
 	},1000/60)
-
-	this.ReDrawInterval = setInterval(() => {
-	Canvas.redraw( mainCommunity.getCreatures() );
+	
+	this.reDraw = true;
+/*	
+	requestAnimationFrame(Canvas.redraw( mainCommunity.getCreatures() ));
+*/
+	this.ReDrawInterval = setInterval(() => { Canvas.redraw( mainCommunity.getCreatures() );
 //	    document.body.textContent = mainCommunity.Plants.concat(mainCommunity.Herbis).sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
-	},1000/5)
+	},1000/10) 
 }
 
-Canvas.stop = function() { clearInterval(this.Interval)
-							clearInterval(this.ReDrawInterval)
+Canvas.stop = function() { 
+		clearInterval(this.Interval)
+		clearInterval(this.ReDrawInterval)
+
+//		this.reDraw = false;
 }
+
 
 //document.addEventListener("keypress", HandleKeyPress());
 document.onkeypress = function() { 
