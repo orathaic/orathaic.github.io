@@ -276,7 +276,7 @@ Canvas.go = function () {
 */
 	this.ReDrawInterval = setInterval(() => { Canvas.redraw( mainCommunity.getCreatures() );
 //	    document.body.textContent = mainCommunity.Plants.concat(mainCommunity.Herbis).sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
-	},1000/10) 
+	},1000/30) 
 }
 
 Canvas.stop = function () { 
