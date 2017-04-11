@@ -265,7 +265,7 @@ Canvas.redraw = function (Creatures) {
 
 }
 
-Canvas.go = function() { 
+Canvas.go = function () { 
 	this.Interval = setInterval(() => {
     mainCommunity.getCreatures().forEach(creature => creature.step())
 	},1000/60)
@@ -279,7 +279,7 @@ Canvas.go = function() {
 	},1000/10) 
 }
 
-Canvas.stop = function() { 
+Canvas.stop = function () { 
 		clearInterval(this.Interval)
 		clearInterval(this.ReDrawInterval)
 
@@ -288,12 +288,12 @@ Canvas.stop = function() {
 
 
 //document.addEventListener("keypress", HandleKeyPress());
-document.onkeypress = function() { 
+document.onkeypress = function () { 
 		switch(event.which) { 
 		case 103: Canvas.go(); break;
 		case 115: Canvas.stop(); break;
 		default:
 		}
 };
-
+window.onload = function () {document.body.textContent = "Press (G)o to begin simulation \nAnd to (S)top or pause simulation"}
 </script>
