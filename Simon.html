@@ -288,7 +288,7 @@ Canvas.stop = function () {
 
 
 //document.addEventListener("keypress", HandleKeyPress());
-document.onkeypress = function () { 
+document.onkeypress = function (event) { 
 		switch(event.which) { 
 		case 103: Canvas.go(); break;
 		case 115: Canvas.stop(); break;
