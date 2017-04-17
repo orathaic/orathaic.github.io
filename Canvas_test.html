@@ -1,7 +1,7 @@
 <!doctype html>
 <style>
 :root {background:#111;color:#eee;white-space:pre}
-#Canvas {height: 100%; width: 100%}
+/*#Canvas {height: 100%; width: 100%}*/
 
 </style>
 <script>
@@ -43,14 +43,10 @@ class Creature {
 		return (Math.pow(Math.abs(target.x - this.x),2) + Math.pow(Math.abs(target.y - this.y),2)) //euclidean distance squared
 	}
 	Draw (ctx, i) {
-		var scale = 2;
 		ctx.beginPath();
-		ctx.arc(this.x/scale,this.y/scale,Math.max(this.energy,1)/(1.5*scale),0,2*Math.PI);
+		ctx.arc(this.x,this.y,Math.max(this.energy,1)/2,0,6.283185307179586); // 6.283185307179586 is 2 * Math.PI 
 		ctx.fillStyle = this.type;
 		ctx.fill();
-//		ctx.lineWidth = 1;
-//	    ctx.strokeStyle = this.type;
-//	    ctx.stroke();
 
 	}
     ///////////////////////////////////////////////
@@ -257,7 +253,7 @@ Canvas.go = function () {
 */
 	this.ReDrawInterval = setInterval(() => { Canvas.redraw( mainCommunity.getCreatures() );
 //	    document.body.textContent = mainCommunity.Plants.concat(mainCommunity.Herbis).sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
-	},1000/30) 
+	},1000/15) 
 }
 
 Canvas.stop = function () { 
@@ -280,6 +276,8 @@ window.onload = function () {
 	document.body.textContent = "Press (G)o to begin simulation \nAnd to (S)top or pause simulation"
 	var C = document.createElement("Canvas")
 	C.id = "Canvas"
+	C.setAttribute("width", window.innerWidth);
+	C.setAttribute("height", window.innerHeight);
 	document.body.appendChild(C)
 	}
 </script>
