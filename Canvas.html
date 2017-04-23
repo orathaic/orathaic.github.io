@@ -1,0 +1,30 @@
+<style>
+:root {background:#111;color:#eee;white-space:pre}
+#Canvas {height: 100%; width: 100%}
+
+</style>
+    <canvas id="Canvas" width="578" height="200"></canvas>
+    <script>
+      var canvas = document.getElementById('Canvas');
+      var context = canvas.getContext('2d');
+      var centerX = canvas.width / 2;
+      var centerY = canvas.height / 2;
+      var radius = 70;
+		var gframe = 0;
+requestAnimationFrame( draw );
+
+	function draw(gframe)
+	{
+//		context.clearRect(0, 0, canvas.width, canvas.height);
+		var radius = Math.abs(Math.cos(gframe/ (2*Math.PI) )) * 35 +1;
+//	console.log
+      context.beginPath();
+      context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+      context.fillStyle = 'green';
+      context.fill();
+      context.lineWidth = 1;
+      context.strokeStyle = 'dark green';
+      context.stroke();
+	requestAnimationFrame(draw);
+	}
+    </script>
