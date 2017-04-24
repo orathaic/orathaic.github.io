@@ -6,41 +6,50 @@
 <script src="Creature.js"></script>
 <script>
 "use strict";
-var mainNeighbourhood = []
-/*
-function getAllCreatures (Neighbourhood) {  
-	var AllCreatures = []
-//	AllCreatures.push( Neighbourhood.forEach( Community => Community.getCreatures() ) )
-	return AllCreatures;
- }*/ 
-//(Community => Community.getCreatures().forEach(creature => creature.step()) )
-for(var i = 0; i < 3; i++){
-	for(var j = 0; j <3; j++){
 
-		mainNeighbourhood[(i*3+j)] = new Community(i,j,mainNeighbourhood) 
+var mainNeighbourhood = []
+var n,m, pixelsPerCommunity
+n = m = 20
+pixelsPerCommunity = 20;
+//mainNeighbourhood[0] = new Community(0.5,0.5, mainNeighbourhood);
+
+for(var i = 0; i < n; i++){
+	for(var j = 0; j < m; j++){
+
+		mainNeighbourhood[(i*n+j)] = new Community(i,j,mainNeighbourhood, pixelsPerCommunity) 
 	}
 }
-//var mainCommunity = new Community(0,0,mainNeighbourhood)
 
 for (var i = 0; i < 7; i++) {
     new Plant(
         mainNeighbourhood[0]
        	//,['red','green','blue'][Math.floor(Math.random()*3)]
 		,'green'
-       	,Math.floor(250*Math.random())+50
-       	,Math.floor(250*Math.random())+50
+       	,Math.floor(pixelsPerCommunity*Math.random())
+       	,Math.floor(pixelsPerCommunity*Math.random())
     )
 }
+
+for (var i = 0; i < 7; i++) {
+    new Plant(
+        mainNeighbourhood[3]
+       	//,['red','green','blue'][Math.floor(Math.random()*3)]
+		,'green'
+       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+    )
+}
+
 
 var Canvas = {};
 Canvas.Neighbourhood = mainNeighbourhood;
 
 Canvas.redraw = function (Creatures) {
-	if(this.reDraw)
-	{
+//	if(this.reDraw)
+	
 	var c = document.getElementById("Canvas");
 	var ctx = c.getContext("2d");
-	ctx.clearRect(0, 0, c.width, c.height);
+//	ctx.clearRect(0, 0, c.width, c.height);
 		for(var i =0, l =Creatures.length; i < l; i++)
 		 { // Draw loop
 			Creature = Creatures[i];
@@ -51,7 +60,20 @@ Canvas.redraw = function (Creatures) {
 		 }
 //		requestAnimationFrame(this.redraw(this.Community.getCreatures() ) );
 //		this.reDraw = false;
-	}
+
+}
+
+Canvas.drawCommunity = function (community) {
+	var c = document.getElementById("Canvas")
+	var ctx = c.getContext("2d")
+	ctx.beginPath()
+	ctx.moveTo(community.lowerBound,community.leftBound)
+	ctx.lineTo(community.upperBound,community.leftBound)
+	ctx.lineTo(community.upperBound,community.rightBound)
+	ctx.lineTo(community.lowerBound,community.rightBound)
+	ctx.lineTo(community.lowerBound,community.leftBound)
+	ctx.strokeStyle = "Yellow"
+	ctx.stroke()
 }
 
 Canvas.go = function () { 
@@ -59,11 +81,18 @@ Canvas.go = function () {
     mainNeighbourhood.forEach(Community => Community.getCreatures().forEach(creature => creature.step()) ) 
 	},1000/60)
 	
-	this.reDraw = true;
+//	this.reDraw = true;
 /*	
 	requestAnimationFrame(Canvas.redraw( mainCommunity.getCreatures() ));
 */
-	this.ReDrawInterval = setInterval(() => { Canvas.redraw( getAllCreatures(mainNeighbourhood) );
+	this.ReDrawInterval = setInterval(() => {
+			var c = document.getElementById("Canvas");
+			var ctx = c.getContext("2d");
+			ctx.clearRect(0, 0, c.width, c.height);
+
+		 for(var i=0, l=mainNeighbourhood.length; i < l; i++) 
+			{ Canvas.redraw( mainNeighbourhood[i].getCreatures()) }
+
 //	    document.body.textContent = mainCommunity.Plants.concat(mainCommunity.Herbis).sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
 	},1000/60) 
 }

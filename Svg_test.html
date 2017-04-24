@@ -6,20 +6,42 @@
 <script src="Creature.js"></script>
 <script>
 "use strict";
-var mainCommunity = new Community(150,150)
+
+var mainNeighbourhood = []
+var n,m, pixelsPerCommunity
+n = m = 20
+pixelsPerCommunity = 20;
+//mainNeighbourhood[0] = new Community(0.5,0.5, mainNeighbourhood);
+
+for(var i = 0; i < n; i++){
+	for(var j = 0; j < m; j++){
+
+		mainNeighbourhood[(i*n+j)] = new Community(i,j,mainNeighbourhood, pixelsPerCommunity) 
+	}
+}
 
 for (var i = 0; i < 7; i++) {
     new Plant(
-        mainCommunity
+        mainNeighbourhood[0]
        	//,['red','green','blue'][Math.floor(Math.random()*3)]
 		,'green'
-       	,Math.floor(250*Math.random())+50
-       	,Math.floor(250*Math.random())+50
+       	,Math.floor(pixelsPerCommunity*Math.random())
+       	,Math.floor(pixelsPerCommunity*Math.random())
+    )
+}
+
+for (var i = 0; i < 7; i++) {
+    new Plant(
+        mainNeighbourhood[3]
+       	//,['red','green','blue'][Math.floor(Math.random()*3)]
+		,'green'
+       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
     )
 }
 
 var Canvas = {};
-Canvas.Community = mainCommunity;
+Canvas.Neighbourhood = mainNeighbourhood;
 Canvas.Empty = function () {
 	var that = document.getElementById('Canvas');
 	while (that.firstChild) {
@@ -33,8 +55,7 @@ Canvas.Append = function (docFragment) {
 }
 
 Canvas.redraw = function (Creatures) {
-	if(this.reDraw)
-	{
+
 		var docFragment = document.createDocumentFragment();
 		for(var i = 0, l = Creatures.length; i < l; i++)
 		 { // Draw loop
@@ -47,23 +68,24 @@ Canvas.redraw = function (Creatures) {
 
 			docFragment.appendChild(ToAdd);
 		 }
-		Canvas.Empty();
+//		Canvas.Empty();
 		Canvas.Append(docFragment);
 //		requestAnimationFrame(this.redraw(this.Community.getCreatures() ) );
 //		this.reDraw = false;
-	}
 }
 
 Canvas.go = function () { 
 	this.Interval = setInterval(() => {
-    mainCommunity.getCreatures().forEach(creature => creature.step())
+	Canvas.Empty();
+    mainNeighbourhood.forEach(Community => Community.getCreatures().forEach(creature => creature.step()) )
 	},1000/60)
 	
-	this.reDraw = true;
 /*	
 	requestAnimationFrame(Canvas.redraw( mainCommunity.getCreatures() ));
 */
-	this.ReDrawInterval = setInterval(() => { Canvas.redraw( mainCommunity.getCreatures() );
+	this.ReDrawInterval = setInterval(() => { 		 
+		for(var i=0, l=mainNeighbourhood.length; i < l; i++) 
+			{ Canvas.redraw( mainNeighbourhood[i].getCreatures()) }
 //	    document.body.textContent = mainCommunity.Plants.concat(mainCommunity.Herbis).sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
 	},1000/60) 
 }
@@ -71,8 +93,6 @@ Canvas.go = function () {
 Canvas.stop = function () { 
 		clearInterval(this.Interval)
 		clearInterval(this.ReDrawInterval)
-
-//		this.reDraw = false;
 }
 
 document.onkeypress = function (event) { 
