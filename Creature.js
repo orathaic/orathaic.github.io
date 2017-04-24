@@ -22,7 +22,7 @@ class Creature {
         this.move()
         this.eat()
         this.reproduce()
-		this.community.boundTest(this)
+		this.boundTest()
     }
 
 	distanceTo (target) {
@@ -34,9 +34,25 @@ class Creature {
     // Debug //////////////////////////////////////
     ///////////////////////////////////////////////
     toString () {
-        return `Behold: ${this.type} creature, at (${Math.round(this.x)}x${Math.round(this.y)}), feeling ${Math.round(this.energy)}.` + (typeof this.birthmark != 'undefined' ? ` ((( ${Math.round(this.birthmark)} )))` : '')
+        return `Behold: ${this.type} creature, at (${Math.round(this.x)},${Math.round(this.y)}), feeling ${Math.round(this.energy)}.` + (typeof this.birthmark != 'undefined' ? ` ((( ${Math.round(this.birthmark)} )))` : '')
     }
     ///////////////////////////////////////////////
+	boundTest () {
+		if (Math.floor(this.x/this.community.pixelsPerCommunity) != this.community.x || Math.floor(this.y/this.community.pixelsPerCommunity) != this.community.y) 
+		{
+			this.newCommunity = this.findCommunity(); 
+			if(!this.newCommunity) this.die() 
+			else this.relocate(this.newCommunity) } 
+	}
+
+	findCommunity () {
+		var x,y
+		x = Math.floor(this.x/this.community.pixelsPerCommunity)
+		y = Math.floor(this.y/this.community.pixelsPerCommunity)
+		for(var i = 0, l = mainNeighbourhood.length; i < l; i++)
+			{ if(mainNeighbourhood[i].x == x && mainNeighbourhood[i].y == y) return mainNeighbourhood[i]}
+		return false
+	}
 }
 
 class Carnivore extends Creature {
@@ -69,7 +85,7 @@ class Carnivore extends Creature {
             candidate => Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2
         ).forEach(prey => {
             prey.die()
-            this.energy += 90
+            this.energy += 40
         })
     }
 
@@ -90,8 +106,15 @@ class Carnivore extends Creature {
         }
     }
 
-	relocate (oldNeighbourhood, newNeighbourhood) {
-		this.newNeighbourhood.Carnivores.push(this)
+	relocate (newNeighbourhood) {
+		    var index = this.community.Carnivores.indexOf(this)
+		    if (index >= 0) {
+		        this.community.Carnivores.splice(index,1)
+		    }
+		    else {
+		        throw new Error('Creature community corruption error.')
+		    }
+		newNeighbourhood.Carnivores.push(this)
 		this.community = newNeighbourhood
 		this.die()
 	}
@@ -127,7 +150,7 @@ class Herbi extends Creature {
             candidate => Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2
         ).forEach(prey => {
             prey.die()
-            this.energy += 90
+            this.energy += 30
         })
     }
 
@@ -151,10 +174,16 @@ class Herbi extends Creature {
             throw new Error('Creature community corruption error.')
         }
     }
-	relocate (oldNeighbourhood, newNeighbourhood) {
-		this.newNeighbourhood.Herbis.push(this)
+	relocate (newNeighbourhood) {
+		    var index = this.community.Herbis.indexOf(this)
+		    if (index >= 0) {
+		        this.community.Herbis.splice(index,1)
+		    }
+		    else {
+		        throw new Error('Creature community corruption error.')
+		    }
+		newNeighbourhood.Herbis.push(this)
 		this.community = newNeighbourhood
-		this.die()
 	}
 }
 
@@ -203,28 +232,36 @@ class Plant extends Creature {
             throw new Error('Creature community corruption error.')
         }
     }
-	relocate (oldNeighbourhood, newNeighbourhood) {
-		this.newNeighbourhood.Plants.push(this)
+
+	relocate (newNeighbourhood) {
+		newNeighbourhood.Plants.push(this)
+		    var index = this.community.Plants.indexOf(this)
+		    if (index >= 0) {
+		        this.community.Plants.splice(index,1)
+		    }
+		    else {
+		        throw new Error('Creature community corruption error.')
+		    }
 		this.community = newNeighbourhood
-		this.die()
 	}
 }
 
 class Community {
-    constructor (x,y,neighbourhood) {
+    constructor (x,y,neighbourhood, pixelsPerCommunity) {
 	this.x = x
 	this.y = y
 	this.neighbourhood = neighbourhood 
 
+	this.pixelsPerCommunity = pixelsPerCommunity
 
-	this.centerX = (200*x + 100)
-	this.centerY = (200*y + 100)
+	this.centerX = (pixelsPerCommunity*(x + 0.5))
+	this.centerY = (pixelsPerCommunity*(y + 0.5))
 //	center () { return {(200*this.x + 100), (200*this.y + 100)} }
 
-	this.lowerBound = this.centerX + 100
-	this.upperBound = this.centerX - 100
-	this.rightBound = this.centerY - 100
-	this.leftBound = this.centerY + 100
+	this.lowerBound = this.centerX + pixelsPerCommunity/2
+	this.upperBound = this.centerX - pixelsPerCommunity/2
+	this.rightBound = this.centerY - pixelsPerCommunity/2
+	this.leftBound = this.centerY + pixelsPerCommunity/2
 
 	this.Plants = []
 	this.Herbis = []
@@ -238,35 +275,41 @@ class Community {
 			this.neighbourhood.forEach(
 		        candidate => {
 					if(candidate.x == this.x) {
-						if(candidate.y == this.y + 1) this.neighbour['upper'] = candidate; 
-						else if(candidate.y == this.y - 1) this.neighbour['lower'] = candidate;
+						if(candidate.y == this.y + 1) {this.neighbour['lower'] = candidate; candidate.neighbour['upper'] = this; }
+						else if(candidate.y == this.y - 1) {this.neighbour['upper'] = candidate; candidate.neighbour['lower'] = this; }
 					}
 					else if(candidate.y == this.y) {
-						if(candidate.x == this.x + 1) this.neighbour['right'] = candidate; 
-						else if(candidate.x == this.x - 1) this.neighbour['left'] = candidate;
-						
+						if(candidate.x == this.x + 1) {this.neighbour['right'] = candidate; candidate.neighbour['left'] = this; }
+						else if(candidate.x == this.x - 1) {this.neighbour['left'] = candidate; candidate.neighbour['right'] = this; }
 					}
 				}
 			)
-
 	}
 
 	getCreatures () { 
 		return this.Plants.concat(this.Herbis).concat(this.Carnivores)
 	}
 
-	boundTest (creature) {
-		if (creature.x > this.lowerBound)
-		{ if(this.neighbour['lower'] == undefined) creature.die(); else { creature.relocate(this, this.neighbour['lower']) } 
-		}
-		else if (creature.x < this.upperBound)
-		{ if(this.neighbour['upper'] == undefined) creature.die(); else { creature.relocate(this, this.neighbour['upper']) } 
-		}
-		else if (creature.y > this.leftBound)
-		{ if(this.neighbour['left'] == undefined) creature.die(); else { creature.relocate(this, this.neighbour['left']) } 
-		}
-		else if (creature.y < this.rightBound)
-		{ if(this.neighbour['right'] == undefined) creature.die(); else { creature.relocate(this, this.neighbour['right']) } 
-		}
+	  toString () {
+        return `This community: : ${this.x},${this.y} with ${this.Plants.length} Plants and ${this.Herbis.length} Herbivores. (${this.upperBound}, ${this.lowerBound}, ${this.rightBound}, ${this.leftBound})`
 	}
 }
+
+
+/*
+function getAllCreatures (Neighbourhood) {  
+	var AllCreatures = []
+//	AllCreatures.push( Neighbourhood.forEach( Community => Community.getCreatures() ) )
+	return AllCreatures;
+ }*/ 
+//(Community => Community.getCreatures().forEach(creature => creature.step()) )
+
+/*for(var i = 0; i < 3; i++){
+	for(var j = 0; j <3; j++){
+
+		mainNeighbourhood[(i*3+j)] = new Community(i,j,mainNeighbourhood) 
+	}
+}*/
+
+//var mainCommunity = new Community(0,0,mainNeighbourhood)
+
