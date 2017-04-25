@@ -9,8 +9,8 @@
 
 var mainNeighbourhood = []
 var n,m, pixelsPerCommunity
-n = m = 20
-pixelsPerCommunity = 20;
+n = m = 4
+pixelsPerCommunity = 800/n;
 //mainNeighbourhood[0] = new Community(0.5,0.5, mainNeighbourhood);
 
 for(var i = 0; i < n; i++){
@@ -19,7 +19,7 @@ for(var i = 0; i < n; i++){
 		mainNeighbourhood[(i*n+j)] = new Community(i,j,mainNeighbourhood, pixelsPerCommunity) 
 	}
 }
-
+/*
 for (var i = 0; i < 7; i++) {
     new Plant(
         mainNeighbourhood[0]
@@ -29,8 +29,8 @@ for (var i = 0; i < 7; i++) {
        	,Math.floor(pixelsPerCommunity*Math.random())
     )
 }
-
-for (var i = 0; i < 7; i++) {
+*/
+for (var i = 0; i < 2; i++) {
     new Plant(
         mainNeighbourhood[3]
        	//,['red','green','blue'][Math.floor(Math.random()*3)]
@@ -75,7 +75,9 @@ Canvas.drawCommunity = function (community) {
 	ctx.strokeStyle = "Yellow"
 	ctx.stroke()
 }
-
+Canvas.drawCommunities = function (neighbourhood) {
+	for(var i = 0, l = neighbourhood.length; i < l; i++) {Canvas.drawCommunity(neighbourhood[i])}
+}
 Canvas.go = function () { 
 	this.Interval = setInterval(() => {
     mainNeighbourhood.forEach(Community => Community.getCreatures().forEach(creature => creature.step()) ) 

@@ -60,7 +60,7 @@ class Carnivore extends Creature {
         if (['red'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Carnivore-Creature type`)
 		
 		super(community,type,x,y,birthmark)
-        this.energy = 40
+        this.energy = 80
 
         community.Carnivores.push(this)
 
@@ -68,8 +68,8 @@ class Carnivore extends Creature {
 
     move () {
         if (this.energy > 0) {
-            this.x += Math.round(( Math.random() - 0.5 ) * (10))
-            this.y += Math.round(( Math.random() - 0.5 ) * (10))
+            this.x += Math.round(( Math.random() - 0.5 ) * (22))
+            this.y += Math.round(( Math.random() - 0.5 ) * (22))
             this.energy -= 1
         } 
         else {
@@ -82,16 +82,16 @@ class Carnivore extends Creature {
 
     eat () {
         this.community.Herbis.filter(
-            candidate => Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2
+            candidate => Math.abs(candidate.x - this.x) < 12 && Math.abs(candidate.y - this.y) < 12
         ).forEach(prey => {
             prey.die()
-            this.energy += 40
+            this.energy += 45
         })
     }
 
     reproduce () {
         if (this.energy > 100) {
-            new Carnivore(this.community,this.type,Math.floor(this.x+Math.random()*4-2),Math.floor(this.y+Math.random()*4-2),this.energy)
+            new Carnivore(this.community,this.type,Math.floor(this.x+((Math.random()-0.5)*8) ),Math.floor(this.y+(Math.random()-0.5)*8),this.energy)
             this.energy -= 100
         }
     }
@@ -133,8 +133,8 @@ class Herbi extends Creature {
 
     move () {
         if (this.energy > 0) {
-            this.x += Math.round(( Math.random() - 0.5 ) * (10))
-            this.y += Math.round(( Math.random() - 0.5 ) * (10))
+            this.x += Math.round(( Math.random() - 0.5 ) * (20))
+            this.y += Math.round(( Math.random() - 0.5 ) * (20))
             this.energy -= 1
         } 
         else {
@@ -147,7 +147,7 @@ class Herbi extends Creature {
 
     eat () {
         this.community.Plants.filter(
-            candidate => Math.abs(candidate.x - this.x) < 2 && Math.abs(candidate.y - this.y) < 2
+            candidate => Math.abs(candidate.x - this.x) < 10 && Math.abs(candidate.y - this.y) < 10
         ).forEach(prey => {
             prey.die()
             this.energy += 30
@@ -201,7 +201,7 @@ class Plant extends Creature {
     eat () {
 			this.energy +=11 // mmm solar power
 			this.community.Plants.filter(
-            candidate => Math.abs(candidate.x - this.x) < 12 && Math.abs(candidate.y - this.y) < 12 && this.distanceTo(candidate) < 144 && candidate != this
+            candidate => Math.abs(candidate.x - this.x) < 12 && Math.abs(candidate.y - this.y) < 12 && this.distanceTo(candidate) < 576 && candidate != this
         	).forEach(competition => {
             this.energy -= 2
         })
@@ -216,8 +216,8 @@ class Plant extends Creature {
     reproduce () {
         if (this.energy > 120) { 
 			{if(Math.random() * 100 > 0.1) 
-	            new Plant(this.community,this.type,Math.round(this.x+(Math.random() - 0.5 )*36),Math.floor(this.y+(Math.random() - 0.5)*24),this.energy)
-			else new Herbi (this.community,"blue",Math.round(this.x+(Math.random() - 0.5 )*36),Math.floor(this.y+(Math.random() - 0.5)*24),this.energy)
+	            new Plant(this.community,this.type,Math.round(this.x+(Math.random() - 0.5 )*64),Math.floor(this.y+(Math.random() - 0.5)*64),this.energy)
+			else new Herbi (this.community,"blue",Math.round(this.x+(Math.random() - 0.5 )*64),Math.floor(this.y+(Math.random() - 0.5)*64),this.energy)
 			}            
 			this.energy -= 100
         }
