@@ -96,13 +96,20 @@ Canvas.go = function () {
 			{ Canvas.redraw( mainNeighbourhood[i].getCreatures()) }
 
 //	    document.body.textContent = mainCommunity.Plants.concat(mainCommunity.Herbis).sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
-	},1000/60) 
+	},1000/60)
+	this.Drawing = true 
 }
 
 Canvas.stop = function () { 
 		clearInterval(this.Interval)
 		clearInterval(this.ReDrawInterval)
-//		this.reDraw = false;
+	this.Drawing = false
+}
+
+document.ontouchstart = function () { alert('touched')
+	if(Canvas.Drawing == undefined || Canvas.Drawing == false)
+		Canvas.go()
+	else Canvas.stop()
 }
 
 document.onkeypress = function () { 
@@ -111,7 +118,7 @@ document.onkeypress = function () {
 		case 115: Canvas.stop(); break;
 		default:
 		}
-};
+}
 
 window.onload = function () {
 	document.body.textContent = "Press (G)o to begin simulation \nAnd to (S)top or pause simulation"
@@ -120,5 +127,5 @@ window.onload = function () {
 	C.setAttribute("width", window.innerWidth);
 	C.setAttribute("height", window.innerHeight);
 	document.body.appendChild(C)
-	}
+}
 </script>
