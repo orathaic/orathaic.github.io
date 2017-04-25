@@ -106,11 +106,15 @@ Canvas.stop = function () {
 	this.Drawing = false
 }
 
-document.ontouchstart = function () { alert('touched')
+Canvas.toggledraw = function () {
 	if(Canvas.Drawing == undefined || Canvas.Drawing == false)
-		Canvas.go()
-	else Canvas.stop()
+			Canvas.go()
+		else Canvas.stop()
 }
+
+/*document.ontouchstart = function () { alert('touched')
+	Canvas.toggledraw()
+}*/
 
 document.onkeypress = function () { 
 		switch(event.which) { 
@@ -121,7 +125,14 @@ document.onkeypress = function () {
 }
 
 window.onload = function () {
-	document.body.textContent = "Press (G)o to begin simulation \nAnd to (S)top or pause simulation"
+	document.body.textContent = "Press (G)o to begin simulation \nAnd to (S)top or pause simulation\n"
+
+	var Button = document.createElement("Button")
+	Button.innerHTML = "Go"
+	document.body.appendChild(Button)
+
+	Button.addEventListener("click", Canvas.toggledraw)
+
 	var C = document.createElement("Canvas")
 	C.id = "Canvas"
 	C.setAttribute("width", window.innerWidth);
