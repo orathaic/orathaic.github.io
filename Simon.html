@@ -10,6 +10,7 @@
 
 </style>
 <script src="Creature.js"></script>
+<script src="Communities.js"></script>
 <script>
 "use strict";
 var mainNeighbourhood = []
@@ -25,7 +26,7 @@ for(var i = 0; i < n; i++){
 	}
 }
 
-for (var i = 0; i < 7; i++) {
+for(var i = 0; i < 7; i++) {
     new Plant(
         mainNeighbourhood[0]
        	//,['red','green','blue'][Math.floor(Math.random()*3)]
@@ -35,7 +36,7 @@ for (var i = 0; i < 7; i++) {
     )
 }
 
-for (var i = 0; i < 7; i++) {
+for(var i = 0; i < 7; i++) {
     new Plant(
         mainNeighbourhood[3]
        	//,['red','green','blue'][Math.floor(Math.random()*3)]
@@ -47,6 +48,10 @@ for (var i = 0; i < 7; i++) {
 
 var Canvas = {};
 Canvas.Neighbourhood = mainNeighbourhood;
+
+Canvas.GetAll = function (Neighbourhood) { 
+	return Neighbourhood.reduce( (allCreatures, Community) =>  allCreatures.concat(Community.getCreatures()) ,[]) 
+}
 
 Canvas.Empty = function ()
 { var that = document.body;
@@ -62,8 +67,6 @@ Canvas.Append = function (docFragment)
 }
 
 Canvas.redraw = function (Creatures) {
-	if(this.reDraw)
-	{
 		var docFragment = document.createDocumentFragment();
 		for(var i =0, l =Creatures.length; i < l; i++)
 		 {
@@ -84,23 +87,18 @@ Canvas.redraw = function (Creatures) {
 		Canvas.Append(docFragment);
 //		requestAnimationFrame(this.redraw(this.Community.getCreatures() ) );
 //		this.reDraw = false;
-	}
-
 }
 
 Canvas.go = function () { 
 	this.Interval = setInterval(() => {
-    mainNeighbourhood.forEach(Community => Community.getCreatures().forEach(creature => creature.step()) )
+    Canvas.GetAll(mainNeighbourhood).forEach(creature => creature.step() )
 	},1000/60)
 	
-	this.reDraw = true;
-/*	
-	requestAnimationFrame(Canvas.redraw( mainCommunity.getCreatures() ));
-*/
+/*	this.reDraw = true;	requestAnimationFrame(Canvas.redraw( mainCommunity.getCreatures() )); */
+
 	this.ReDrawInterval = setInterval(() => {
 		Canvas.Empty();
-		for(var i=0, l=mainNeighbourhood.length; i < l; i++) 
-			{ Canvas.redraw( mainNeighbourhood[i].getCreatures()) }
+		Canvas.redraw( Canvas.GetAll(mainNeighbourhood) )
 //	    document.body.textContent = mainCommunity.Plants.concat(mainCommunity.Herbis).sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
 	},1000/60) 
 }
