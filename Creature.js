@@ -40,18 +40,43 @@ class Creature {
 	boundTest () {
 		if (Math.floor(this.x/this.community.pixelsPerCommunity) != this.community.x || Math.floor(this.y/this.community.pixelsPerCommunity) != this.community.y) 
 		{
-			this.newCommunity = this.findCommunity(); 
+			this.newCommunity = this.findCommunity( this.x, this.y ); 
 			if(!this.newCommunity) this.die() 
 			else this.relocate(this.newCommunity) } 
 	}
 
-	findCommunity () {
+	findCommunity (CreatureX, CreatureY) {
 		var x,y
-		x = Math.floor(this.x/this.community.pixelsPerCommunity)
-		y = Math.floor(this.y/this.community.pixelsPerCommunity)
+		x = Math.floor(CreatureX/this.community.pixelsPerCommunity)
+		y = Math.floor(CreatureY/this.community.pixelsPerCommunity)
 		for(var i = 0, l = mainNeighbourhood.length; i < l; i++)
 			{ if(mainNeighbourhood[i].x == x && mainNeighbourhood[i].y == y) return mainNeighbourhood[i]}
 		return false
+	}
+	
+	edgeEffect (range) {
+		var nextTargetCommunities = []
+		//range // should be pushed into the constructor
+		var communityWidth = this.community.pixelsPerCommunity
+		if( (communityWidth * (this.community.x+1) - this.x)  < range)
+			{
+				nextTargetCommunities.push( this.findCommunity(this.community.x + range + 1, this.community.y) )
+			}
+		else if ( (this.x - communityWidth * (this.community.x-1))  < range)
+			{
+				nextTargetCommunities.push( this.findCommunity(this.community.x - range - 1, this.community.y) )
+			}
+		if( (communityWidth * (this.community.y+1) - this.y)  < range)
+			{
+				nextTargetCommunities.push( this.findCommunity(this.community.x, this.community.y + range + 1) )
+			}
+		else if ( (this.y - communityWidth * (this.community.y-1))  < range)
+			{
+				nextTargetCommunities.push( this.findCommunity(this.community.x, this.community.y - range - 1) )
+			}
+		// edge effects 
+		if(nextTargetCommunities) return nextTargetCommunities 
+		else return false
 	}
 }
 
@@ -81,8 +106,14 @@ class Carnivore extends Creature {
     }
 
     eat () {
-        this.community.Herbis.filter(
-            candidate => Math.abs(candidate.x - this.x) < 12 && Math.abs(candidate.y - this.y) < 12
+		const range = 12 // should be in constructor.
+		var target = this.community.Herbis
+
+		var extraTargetCommunities = this.edgeEffect(range)
+		while(extraTargetCommunities[0]) { var next = extraTargetCommunities.shift(); target.concat(next.Herbis) } 
+		
+        target.filter(
+            candidate => Math.abs(candidate.x - this.x) < range && Math.abs(candidate.y - this.y) < range
         ).forEach(prey => {
             prey.die()
             this.energy += 45
@@ -146,8 +177,14 @@ class Herbi extends Creature {
     }
 
     eat () {
-        this.community.Plants.filter(
-            candidate => Math.abs(candidate.x - this.x) < 10 && Math.abs(candidate.y - this.y) < 10
+		const range = 10 // should be in constructor.
+		var target = this.community.Plants
+
+		var extraTargetCommunities = this.edgeEffect(range)
+		while(extraTargetCommunities[0]) { var next = extraTargetCommunities.shift(); target.concat(next.Plants) } 
+
+        target.filter(
+            candidate => Math.abs(candidate.x - this.x) < range && Math.abs(candidate.y - this.y) < range
         ).forEach(prey => {
             prey.die()
             this.energy += 30
@@ -199,9 +236,19 @@ class Plant extends Creature {
     }
 
     eat () {
+			const range = 12 // should be in constructor.
+			var target = this.community.Plants
+
+			var extraTargetCommunities = this.edgeEffect(range)
+			while(extraTargetCommunities[0]) { 
+											var next = extraTargetCommunities.shift(); 
+											target.concat(next.Plants) 
+										} 
+
+
 			this.energy +=11 // mmm solar power
-			this.community.Plants.filter(
-            candidate => Math.abs(candidate.x - this.x) < 12 && Math.abs(candidate.y - this.y) < 12 && this.distanceTo(candidate) < 576 && candidate != this
+			target.filter(
+            candidate => Math.abs(candidate.x - this.x) < range && Math.abs(candidate.y - this.y) < range && this.distanceTo(candidate) < range*range && candidate != this
         	).forEach(competition => {
             this.energy -= 2
         })

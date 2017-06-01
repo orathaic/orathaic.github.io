@@ -51,10 +51,10 @@ Canvas.GetAll = function (Neighbourhood) {
 
 Canvas.redraw = function (Creatures) {
 //	if(this.reDraw)
-	
-	var c = document.getElementById("Canvas");
-	var ctx = c.getContext("2d");
-//	ctx.clearRect(0, 0, c.width, c.height);
+	if(!this.CanvasEL)
+		{this.CanvasEL = document.getElementById("Canvas");} 
+	var ctx = this.CanvasEL.getContext("2d");
+	ctx.clearRect(0, 0, this.CanvasEL.width, this.CanvasEL.height);
 		for(var i =0, l =Creatures.length; i < l; i++)
 		 { // Draw loop
 			Creature = Creatures[i];
@@ -63,10 +63,8 @@ Canvas.redraw = function (Creatures) {
 			ctx.fillStyle = Creature.type;
 			ctx.fill();
 		 }
-//		requestAnimationFrame(this.redraw(this.Community.getCreatures() ) );
-//		this.reDraw = false;
-	if(this.drawComBool == true) this.drawCommunities(this.Neighbourhood)
 
+	if(this.drawComBool == true) this.drawCommunities(this.Neighbourhood)
 }
 
 Canvas.drawCommunity = function (community) {
@@ -93,18 +91,18 @@ Canvas.go = function () {
     Canvas.GetAll(mainNeighbourhood).forEach(creature => creature.step())  
 	},1000/60)
 	
-//	this.reDraw = true;
-/*	requestAnimationFrame(Canvas.redraw( mainCommunity.getCreatures() ));*/
-	this.ReDrawInterval = setInterval(() => {
-			var c = document.getElementById("Canvas");
-			var ctx = c.getContext("2d");
-			ctx.clearRect(0, 0, c.width, c.height);
- 
-			Canvas.redraw( Canvas.GetAll(mainNeighbourhood) )
+	this.Drawing = true
+	requestAnimationFrame(Canvas.tick);
+}
 
-//	    document.body.textContent = mainCommunity.Plants.concat(mainCommunity.Herbis).sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
-	},1000/60)
-	this.Drawing = true 
+Canvas.tick = function (timestamp) {
+		
+		if (!Canvas.start) Canvas.start = timestamp;
+			var progress = timestamp - Canvas.start;
+		if(progress > 20) { 
+			Canvas.redraw( Canvas.GetAll(mainNeighbourhood) )
+		}
+	if(Canvas.Drawing) window.requestAnimationFrame(Canvas.tick);
 }
 
 Canvas.stop = function () { 
@@ -145,5 +143,6 @@ window.onload = function () {
 	C.setAttribute("width", window.innerWidth);
 	C.setAttribute("height", window.innerHeight);
 	document.body.appendChild(C)
+	Canvas.CanvasEL = C;
 }
 </script>
