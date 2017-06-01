@@ -4,6 +4,7 @@
 #Canvas {height: 100%; width: 100%; position:absolute; top:0; left:0}
 </style>
 <script src="Creature.js"></script>
+<script src="Communities.js"></script>
 <script>
 "use strict";
 
@@ -20,7 +21,7 @@ for(var i = 0; i < n; i++){
 	}
 }
 
-for (var i = 0; i < 7; i++) {
+for(var i = 0; i < 7; i++) {
     new Plant(
         mainNeighbourhood[0]
        	//,['red','green','blue'][Math.floor(Math.random()*3)]
@@ -30,7 +31,7 @@ for (var i = 0; i < 7; i++) {
     )
 }
 
-for (var i = 0; i < 7; i++) {
+for(var i = 0; i < 7; i++) {
     new Plant(
         mainNeighbourhood[3]
        	//,['red','green','blue'][Math.floor(Math.random()*3)]
@@ -42,6 +43,11 @@ for (var i = 0; i < 7; i++) {
 
 var Canvas = {};
 Canvas.Neighbourhood = mainNeighbourhood;
+
+Canvas.GetAll = function (Neighbourhood) { 
+	return Neighbourhood.reduce( (allCreatures, Community) =>  allCreatures.concat(Community.getCreatures()) ,[]) 
+}
+
 Canvas.Empty = function () {
 	var that = document.getElementById('Canvas');
 	while (that.firstChild) {
@@ -77,15 +83,14 @@ Canvas.redraw = function (Creatures) {
 Canvas.go = function () { 
 	this.Interval = setInterval(() => {
 	Canvas.Empty();
-    mainNeighbourhood.forEach(Community => Community.getCreatures().forEach(creature => creature.step()) )
+    Canvas.GetAll(mainNeighbourhood).forEach(creature => creature.step()) 
 	},1000/60)
 	
 /*	
 	requestAnimationFrame(Canvas.redraw( mainCommunity.getCreatures() ));
 */
 	this.ReDrawInterval = setInterval(() => { 		 
-		for(var i=0, l=mainNeighbourhood.length; i < l; i++) 
-			{ Canvas.redraw( mainNeighbourhood[i].getCreatures()) }
+	Canvas.redraw( Canvas.GetAll(mainNeighbourhood))
 //	    document.body.textContent = mainCommunity.Plants.concat(mainCommunity.Herbis).sort((aa,bb) => bb.energy - aa.energy).map(creature => creature.toString()).join('\n')
 	},1000/60) 
 }
