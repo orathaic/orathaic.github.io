@@ -1,4 +1,3 @@
-<!doctype html>
 # EcoSim
 
 EcoSim, based on phyton project, re-written in for the web.
