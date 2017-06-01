@@ -7,11 +7,11 @@
 <script src="Communities.js"></script>
 <script>
 "use strict";
-
+var CanvasSize = 800
 var mainNeighbourhood = []
 var n,m, pixelsPerCommunity
 n = m = 4
-pixelsPerCommunity = 800/n;
+pixelsPerCommunity = CanvasSize/n;
 //mainNeighbourhood[0] = new Community(0.5,0.5, mainNeighbourhood);
 
 for(var i = 0; i < n; i++){
@@ -140,8 +140,8 @@ window.onload = function () {
 
 	var C = document.createElement("Canvas")
 	C.id = "Canvas"
-	C.setAttribute("width", window.innerWidth);
-	C.setAttribute("height", window.innerHeight);
+	C.setAttribute("height", CanvasSize);
+	C.setAttribute("width", CanvasSize);
 	document.body.appendChild(C)
 	Canvas.CanvasEL = C;
 }

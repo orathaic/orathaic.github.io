@@ -147,7 +147,6 @@ class Carnivore extends Creature {
 		    }
 		newNeighbourhood.Carnivores.push(this)
 		this.community = newNeighbourhood
-		this.die()
 	}
 }
 
