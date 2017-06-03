@@ -7,7 +7,7 @@
 <script src="Communities.js"></script>
 <script>
 "use strict";
-var CanvasSize = 800
+var CanvasSize = 400
 var mainNeighbourhood = []
 var n,m, pixelsPerCommunity
 n = m = 4
@@ -33,16 +33,15 @@ for (var i = 0; i < 7; i++) {
 */
 for (var i = 0; i < 2; i++) {
     new Plant(
-        mainNeighbourhood[3]
-       	//,['red','green','blue'][Math.floor(Math.random()*3)]
-		,'green'
+       	//['red','green','blue'][Math.floor(Math.random()*3)]
+		'green'
        	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
        	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
     )
 }
 
 
-var Canvas = { drawComBool: false};
+var Canvas = { drawComBool: true};
 Canvas.Neighbourhood = mainNeighbourhood;
 
 Canvas.GetAll = function (Neighbourhood) {
@@ -59,7 +58,7 @@ Canvas.redraw = function (Creatures) {
 		 { // Draw loop
 			Creature = Creatures[i];
 			ctx.beginPath();
-			ctx.arc(Creature.x,Creature.y,Math.max(Creature.energy,1)/20,0,6.283185307179586); // 6.283185307179586 is 2 * Math.PI 
+			ctx.arc(Creature.x,Creature.y,Math.max(Creature.energy,3)/20,0,6.283185307179586); // 6.283185307179586 is 2 * Math.PI 
 			ctx.fillStyle = Creature.type;
 			ctx.fill();
 		 }
