@@ -1,7 +1,7 @@
 "use strict";
 class Creature {
     constructor (type,x,y,birthmark, typeName) {
-       	//,['red','green','blue'][Math.floor(Math.random()*3)]
+
         if (['green','red','blue'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Creature type`)
         if (typeof x != 'number') throw new TypeError(`x: ${x} is not a number`)
         if (typeof y != 'number') throw new TypeError(`y: ${y} is not a number`)
@@ -15,7 +15,6 @@ class Creature {
         this.y = y
 
         this.birthmark = birthmark
-//        this.energy = 90
     }
 
     step () {
@@ -80,7 +79,7 @@ class Creature {
 		return false
 	}
 	
-	addEdgeCommunities (range, targetArray) {
+	addEdgeCommunities (range, targetArray) { 		// edge effects 
 		var next, communityWidth = pixelsPerCommunity 
 		if( (communityWidth * (this.community.x+1) - this.x)  < range)
 			{
@@ -102,9 +101,6 @@ class Creature {
 				next = this.findCommunity(this.community.x, this.community.y - range - 1) 
 				if(next) targetArray.push(next)
 			}
-		// edge effects 
-		if(targetArray.length > 0) return targetArray 
-		else return false
 	}
 }
 
@@ -115,12 +111,13 @@ class Carnivore extends Creature {
 		super(type,x,y,birthmark, 'Carnivores')	
         this.energy = 80
 		this.moveDistance = 22
+		this.range=12
 			
 		if(this.community) this.community.Carnivores.push(this)		
 	}
 
     eat () {
-		const range = 12 // should be in constructor.
+		const range = this.range
 		var targetCommunities = [this.community]
 		this.addEdgeCommunities(range, targetCommunities) 
 
@@ -165,12 +162,13 @@ class Herbi extends Creature {
 		super(type,x,y,birthmark, 'Herbis')
         this.energy = 80
 		this.moveDistance = 20
-		
+		this.range = 10		
+
         if(this.community) this.community.Herbis.push(this)
 	}
 
     eat () {
-		const range = 10 // should be in constructor.
+		const range = this.range
 		var targetCommunities = [this.community]
 		this.addEdgeCommunities(range, targetCommunities)
 
@@ -215,12 +213,13 @@ class Plant extends Creature {
 
         this.energy = 45
 		this.moveDistance = 0
+		this.range = 12
 
         if(this.community) this.community.Plants.push(this)
     }
 
     eat () {
-			const range = 12 // should be in constructor.
+			const range = this.range
 			var targetCommunities = [this.community]
 			this.addEdgeCommunities(range, targetCommunities)
 

@@ -7,12 +7,11 @@
 <script src="Communities.js"></script>
 <script>
 "use strict";
-var CanvasSize = 400
+var CanvasSize = 800
 var mainNeighbourhood = []
 var n,m, pixelsPerCommunity
-n = m = 4
+n = m = 6
 pixelsPerCommunity = CanvasSize/n;
-//mainNeighbourhood[0] = new Community(0.5,0.5, mainNeighbourhood);
 
 for(var i = 0; i < n; i++){
 	for(var j = 0; j < m; j++){
@@ -20,20 +19,9 @@ for(var i = 0; i < n; i++){
 		mainNeighbourhood[(i*n+j)] = new Community(i,j,mainNeighbourhood, pixelsPerCommunity) 
 	}
 }
-/*
-for (var i = 0; i < 7; i++) {
-    new Plant(
-        mainNeighbourhood[0]
-       	//,['red','green','blue'][Math.floor(Math.random()*3)]
-		,'green'
-       	,Math.floor(pixelsPerCommunity*Math.random())
-       	,Math.floor(pixelsPerCommunity*Math.random())
-    )
-}
-*/
+
 for (var i = 0; i < 2; i++) {
     new Plant(
-       	//['red','green','blue'][Math.floor(Math.random()*3)]
 		'green'
        	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
        	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
@@ -41,7 +29,7 @@ for (var i = 0; i < 2; i++) {
 }
 
 
-var Canvas = { drawComBool: true};
+var Canvas = { drawComBool: false};
 Canvas.Neighbourhood = mainNeighbourhood;
 
 Canvas.GetAll = function (Neighbourhood) {
@@ -49,12 +37,13 @@ Canvas.GetAll = function (Neighbourhood) {
 }
 
 Canvas.redraw = function (Creatures) {
-//	if(this.reDraw)
 	if(!this.CanvasEL)
 		{this.CanvasEL = document.getElementById("Canvas");} 
+
 	var ctx = this.CanvasEL.getContext("2d");
 	ctx.clearRect(0, 0, this.CanvasEL.width, this.CanvasEL.height);
-		for(var i =0, l =Creatures.length; i < l; i++)
+
+	for(var i =0, l =Creatures.length; i < l; i++)
 		 { // Draw loop
 			Creature = Creatures[i];
 			ctx.beginPath();
@@ -64,6 +53,12 @@ Canvas.redraw = function (Creatures) {
 		 }
 
 	if(this.drawComBool == true) this.drawCommunities(this.Neighbourhood)
+}
+
+Canvas.drawCom = function (B) {this.drawComBool = B}
+
+Canvas.drawCommunities = function (neighbourhood) {
+	for(var i = 0, l = neighbourhood.length; i < l; i++) {Canvas.drawCommunity(neighbourhood[i])}
 }
 
 Canvas.drawCommunity = function (community) {
@@ -79,12 +74,6 @@ Canvas.drawCommunity = function (community) {
 	ctx.stroke()
 }
 
-Canvas.drawCommunities = function (neighbourhood) {
-	for(var i = 0, l = neighbourhood.length; i < l; i++) {Canvas.drawCommunity(neighbourhood[i])}
-}
-
-Canvas.drawCom = function (B) {this.drawComBool = B}
-
 Canvas.go = function () { 
 	this.Interval = setInterval(() => {
     Canvas.GetAll(mainNeighbourhood).forEach(creature => creature.step())  
@@ -92,16 +81,6 @@ Canvas.go = function () {
 	
 	this.Drawing = true
 	requestAnimationFrame(Canvas.tick);
-}
-
-Canvas.tick = function (timestamp) {
-		
-		if (!Canvas.start) Canvas.start = timestamp;
-			var progress = timestamp - Canvas.start;
-		if(progress > 20) { 
-			Canvas.redraw( Canvas.GetAll(mainNeighbourhood) )
-		}
-	if(Canvas.Drawing) window.requestAnimationFrame(Canvas.tick);
 }
 
 Canvas.stop = function () { 
@@ -112,13 +91,18 @@ Canvas.stop = function () {
 
 Canvas.toggledraw = function () {
 	if(Canvas.Drawing == undefined || Canvas.Drawing == false)
-			Canvas.go()
-		else Canvas.stop()
+		 {Canvas.go(); Canvas.goButton.innerHTML = "Stop"}
+	else {Canvas.stop(); Canvas.goButton.innerHTML = "Go"}
 }
-
-/*document.ontouchstart = function () { alert('touched')
-	Canvas.toggledraw()
-}*/
+Canvas.tick = function (timestamp) {
+		
+		if (!Canvas.start) Canvas.start = timestamp;
+			var progress = timestamp - Canvas.start;
+		if(progress > 20) { 
+			Canvas.redraw( Canvas.GetAll(mainNeighbourhood) )
+		}
+	if(Canvas.Drawing) window.requestAnimationFrame(Canvas.tick);
+}
 
 document.onkeypress = function () { 
 		switch(event.which) { 
@@ -131,11 +115,11 @@ document.onkeypress = function () {
 window.onload = function () {
 	document.body.textContent = "Press (G)o to begin simulation \nAnd to (S)top or pause simulation\n"
 
-	var Button = document.createElement("Button")
-	Button.innerHTML = "Go"
-	document.body.appendChild(Button)
+	Canvas.goButton = document.createElement("Button")
+	Canvas.goButton.innerHTML = "Go"
+	document.body.appendChild(Canvas.goButton)
 
-	Button.addEventListener("click", Canvas.toggledraw)
+	Canvas.goButton.addEventListener("click", Canvas.toggledraw)
 
 	var C = document.createElement("Canvas")
 	C.id = "Canvas"
