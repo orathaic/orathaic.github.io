@@ -28,7 +28,6 @@ for (var i = 0; i < 2; i++) {
     )
 }
 
-
 var Canvas = { drawComBool: false};
 Canvas.Neighbourhood = mainNeighbourhood;
 
@@ -81,24 +80,25 @@ Canvas.go = function () {
 	
 	this.Drawing = true
 	requestAnimationFrame(Canvas.tick);
+	Canvas.goButton.innerHTML = "Stop"
 }
 
 Canvas.stop = function () { 
-		clearInterval(this.Interval)
-		clearInterval(this.ReDrawInterval)
+	clearInterval(this.Interval)
 	this.Drawing = false
+	Canvas.goButton.innerHTML = "Go"
 }
 
 Canvas.toggledraw = function () {
 	if(Canvas.Drawing == undefined || Canvas.Drawing == false)
-		 {Canvas.go(); Canvas.goButton.innerHTML = "Stop"}
-	else {Canvas.stop(); Canvas.goButton.innerHTML = "Go"}
+		 {Canvas.go();}
+	else {Canvas.stop();}
 }
+
 Canvas.tick = function (timestamp) {
-		
 		if (!Canvas.start) Canvas.start = timestamp;
 			var progress = timestamp - Canvas.start;
-		if(progress > 20) { 
+		if(progress > 60) { 
 			Canvas.redraw( Canvas.GetAll(mainNeighbourhood) )
 		}
 	if(Canvas.Drawing) window.requestAnimationFrame(Canvas.tick);
