@@ -1,14 +1,15 @@
 "use strict";
 class Creature {
-    constructor (type,x,y,birthmark, typeName) {
-
+    constructor (type,x,y,birthmark) {
         if (['green','red','blue'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Creature type`)
         if (typeof x != 'number') throw new TypeError(`x: ${x} is not a number`)
         if (typeof y != 'number') throw new TypeError(`y: ${y} is not a number`)
 
         this.community = this.findCommunity(x, y)
         this.type = type
-        this.typeName = typeName
+
+		if(this.community) this.community.Creatures[this.type].push(this)		
+
         this.moveDistance = 0
 
         this.x = x
@@ -28,7 +29,6 @@ class Creature {
 		return (Math.pow(Math.abs(target.x - this.x),2) + Math.pow(Math.abs(target.y - this.y),2)) //euclidean distance squared
 	}
     ///////////////////////////////////////////////
-
     ///////////////////////////////////////////////
     // Debug //////////////////////////////////////
     ///////////////////////////////////////////////
@@ -57,18 +57,29 @@ class Creature {
             this.die()
         }
     }
+
 	relocate (newNeighbourhood) {
-		var type = this.typeName
-	    var index = this.community[type].indexOf(this)
+	//	var type = this.typeName
+	    var index = this.community.Creatures[this.type].indexOf(this)
 	    if (index >= 0) {
-	        this.community[type].splice(index,1)
+	        this.community.Creatures[this.type].splice(index,1)
 	    }
 	    else {
 	        throw new Error('Creature community corruption error.')
 	    }
-	newNeighbourhood[type].push(this)
+	newNeighbourhood.Creatures[this.type].push(this)
 	this.community = newNeighbourhood
 	}
+
+    die () {
+        var index = this.community.Creatures[this.type].indexOf(this)
+        if (index >= 0) {
+            this.community.Creatures[this.type].splice(index,1)
+        }
+        else {
+            throw new Error('Creature community corruption error.')
+        }
+    }
 	
 	findCommunity (CreatureX, CreatureY) {
 		var x,y
@@ -108,12 +119,10 @@ class Carnivore extends Creature {
     constructor (type,x,y,birthmark) {
         if (['red'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Carnivore-Creature type`)
 		
-		super(type,x,y,birthmark, 'Carnivores')	
+		super(type,x,y,birthmark)	
         this.energy = 80
 		this.moveDistance = 22
 		this.range=12
-			
-		if(this.community) this.community.Carnivores.push(this)		
 	}
 
     eat () {
@@ -123,7 +132,7 @@ class Carnivore extends Creature {
 
 		for(var i = 0, l = targetCommunities.length; i < l; i++)
 		{
-			targetCommunities[i].Herbis.filter(
+			targetCommunities[i].Creatures['blue'].filter(
 				candidate => Math.abs(candidate.x - this.x) < range && Math.abs(candidate.y - this.y) < range
 			).forEach(prey => {
 		
@@ -143,28 +152,16 @@ class Carnivore extends Creature {
             this.energy -= 90
         }
     }
-
-    die () {
-        var index = this.community.Carnivores.indexOf(this)
-        if (index >= 0) {
-            this.community.Carnivores.splice(index,1)
-        }
-        else {
-            throw new Error('Creature community corruption error.')
-        }
-    }
 }
 
 class Herbi extends Creature {
     constructor (type,x,y,birthmark) {
         if (['blue'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Herbi-Creature type`)
 		
-		super(type,x,y,birthmark, 'Herbis')
+		super(type,x,y,birthmark)
         this.energy = 80
 		this.moveDistance = 20
 		this.range = 10		
-
-        if(this.community) this.community.Herbis.push(this)
 	}
 
     eat () {
@@ -174,7 +171,7 @@ class Herbi extends Creature {
 
 		for(var i = 0, l = targetCommunities.length; i < l; i++)
 		{
-			targetCommunities[i].Plants.filter(
+			targetCommunities[i].Creatures['green'].filter(
 				candidate => Math.abs(candidate.x - this.x) < range && Math.abs(candidate.y - this.y) < range
 			).forEach(prey => {
 				prey.energy -= 40
@@ -193,29 +190,17 @@ class Herbi extends Creature {
 			}
         }
     }
-
-    die () {
-        var index = this.community.Herbis.indexOf(this)
-        if (index >= 0) {
-            this.community.Herbis.splice(index,1)
-        }
-        else {
-            throw new Error('Creature community corruption error.')
-        }
-    }
 }
 
 class Plant extends Creature {
     constructor (type,x,y,birthmark) {
         if (['green'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Plant-Creature type`)
 		
-		super(type,x,y,birthmark, 'Plants')
+		super(type,x,y,birthmark)
 
         this.energy = 45
 		this.moveDistance = 0
 		this.range = 12
-
-        if(this.community) this.community.Plants.push(this)
     }
 
     eat () {
@@ -227,7 +212,7 @@ class Plant extends Creature {
 
 			for(var i = 0, l = targetCommunities.length; i < l; i++)
 			{
-				targetCommunities[i].Plants.filter(
+				targetCommunities[i].Creatures['green'].filter(
 		        	candidate => Math.abs(candidate.x - this.x) < range && Math.abs(candidate.y - this.y) < range 
 					&& this.distanceTo(candidate) < range*range && candidate != this
 		    	).forEach(competition => {
@@ -251,14 +236,4 @@ class Plant extends Creature {
 			this.energy -= 90
         }
 	}
-
-    die () {
-        var index = this.community.Plants.indexOf(this)
-        if (index >= 0) {
-            this.community.Plants.splice(index,1)
-        }
-        else {
-            throw new Error('Creature community corruption error.')
-        }
-    }
 }
