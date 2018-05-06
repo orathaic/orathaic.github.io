@@ -16,7 +16,7 @@ class Community {
 	this.rightBound = this.centerY - pixelsPerCommunity/2
 	this.leftBound = this.centerY + pixelsPerCommunity/2
 
-	this.Creatures = {'green':[], 'blue':[], 'red':[]}
+	this.creatures = {'green':[], 'yellow':[], 'blue':[], 'red':[]}
 	this.neighbour = []
 	this.getNeighbours()
 
@@ -38,10 +38,10 @@ class Community {
 	}
 
 	getCreatures () { 
-		return [...this.Creatures.green, ...this.Creatures.blue, ...this.Creatures.red]
+		return [...this.creatures.green, ...this.creatures.yellow, ...this.creatures.blue, ...this.creatures.red]
 	}
 
 	  toString () {
-        return `This community: : ${this.x},${this.y} with ${this.Creatures['green'].length} Plants and ${this.Creatures['blue'].length} Herbivores. (${this.upperBound}, ${this.lowerBound}, ${this.rightBound}, ${this.leftBound})`
+        return `This community: : ${this.x},${this.y} with ${this.creatures['green'].length} Plants and ${this.creatures['blue'].length} Herbivores. (${this.upperBound}, ${this.lowerBound}, ${this.rightBound}, ${this.leftBound})`
 	}
 }

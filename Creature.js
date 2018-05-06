@@ -1,14 +1,16 @@
 "use strict";
 class Creature {
     constructor (type,x,y,birthmark) {
-        if (['green','red','blue'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Creature type`)
+        if (['green', 'yellow','red','blue'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Creature type`)
         if (typeof x != 'number') throw new TypeError(`x: ${x} is not a number`)
         if (typeof y != 'number') throw new TypeError(`y: ${y} is not a number`)
 
         this.community = this.findCommunity(x, y)
+		if(!this.community) return false
+		else
         this.type = type
 
-		if(this.community) this.community.Creatures[this.type].push(this)		
+		if(this.community) this.community.creatures[this.type].push(this)		
 
         this.moveDistance = 0
 
@@ -60,21 +62,21 @@ class Creature {
 
 	relocate (newNeighbourhood) {
 	//	var type = this.typeName
-	    var index = this.community.Creatures[this.type].indexOf(this)
+	    var index = this.community.creatures[this.type].indexOf(this)
 	    if (index >= 0) {
-	        this.community.Creatures[this.type].splice(index,1)
+	        this.community.creatures[this.type].splice(index,1)
 	    }
 	    else {
 	        throw new Error('Creature community corruption error.')
 	    }
-	newNeighbourhood.Creatures[this.type].push(this)
+	newNeighbourhood.creatures[this.type].push(this)
 	this.community = newNeighbourhood
 	}
 
     die () {
-        var index = this.community.Creatures[this.type].indexOf(this)
+        var index = this.community.creatures[this.type].indexOf(this)
         if (index >= 0) {
-            this.community.Creatures[this.type].splice(index,1)
+            this.community.creatures[this.type].splice(index,1)
         }
         else {
             throw new Error('Creature community corruption error.')
@@ -132,7 +134,7 @@ class Carnivore extends Creature {
 
 		for(var i = 0, l = targetCommunities.length; i < l; i++)
 		{
-			targetCommunities[i].Creatures['blue'].filter(
+			targetCommunities[i].creatures['blue'].filter(
 				candidate => Math.abs(candidate.x - this.x) < range && Math.abs(candidate.y - this.y) < range
 			).forEach(prey => {
 		
@@ -171,11 +173,14 @@ class Herbi extends Creature {
 
 		for(var i = 0, l = targetCommunities.length; i < l; i++)
 		{
-			targetCommunities[i].Creatures['green'].filter(
+			[...targetCommunities[i].creatures['green'], ...targetCommunities[i].creatures['yellow']].filter(
 				candidate => Math.abs(candidate.x - this.x) < range && Math.abs(candidate.y - this.y) < range
 			).forEach(prey => {
 				prey.energy -= 40
+				if(prey.type == 'green')
 				this.energy += 10
+				else if(prey.type == 'yellow')
+				this.energy -= 10
 			})
 		}
 	}
@@ -194,46 +199,96 @@ class Herbi extends Creature {
 
 class Plant extends Creature {
     constructor (type,x,y,birthmark) {
-        if (['green'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Plant-Creature type`)
+        if (['green', 'yellow'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Plant-Creature type`)
 		
-		super(type,x,y,birthmark)
+		var result = super(type,x,y,birthmark)
+		if(!result) return false
 
         this.energy = 45
 		this.moveDistance = 0
 		this.range = 12
+		this.shade = []
+		
+		this.generateShade()
     }
 
-    eat () {
-			const range = this.range
+	generateShade() {
+	const range = this.range
+			if(this.community == false) return
 			var targetCommunities = [this.community]
 			this.addEdgeCommunities(range, targetCommunities)
 
-			this.energy +=11 // mmm solar power
-
 			for(var i = 0, l = targetCommunities.length; i < l; i++)
-			{
-				targetCommunities[i].Creatures['green'].filter(
+			{ 
+				[...targetCommunities[i].creatures['green'], ...targetCommunities[i].creatures['yellow']].filter(
 		        	candidate => Math.abs(candidate.x - this.x) < range && Math.abs(candidate.y - this.y) < range 
 					&& this.distanceTo(candidate) < range*range && candidate != this
 		    	).forEach(competition => {
-		        	this.energy -= 2
+		        	this.shade.push(competition)
+					competition.shade.push(this)
 				})
 			}
 	}
 
+	loseShade(loss) {
+	var index = this.shade.indexOf(loss)
+		if (index >= 0) {
+			this.shade.splice(index,1)	
+		}
+	}
+
+    eat () {
+			this.energy += (11 - this.shade.length*2) // mmm solar power			
+	}
+
     move ( ) {
         if (this.energy < -100) {
+			this.shade.forEach(target => target.loseShade(this))
             this.die()
         }
     }
 
+
     reproduce () {
-        if (this.energy > 120) { 
-			{if(Math.random() * 100 > 0.1) 
-	            new Plant(this.type,Math.round(this.x+(Math.random() - 0.5 )*64),Math.floor(this.y+(Math.random() - 0.5)*64),this.energy)
-			else new Herbi ("blue",Math.round(this.x+(Math.random() - 0.5 )*64),Math.floor(this.y+(Math.random() - 0.5)*64),this.energy)
+        if (this.energy > 120) { var rand = Math.random() * 100
+			{if(rand > 2) 
+	            new Plant(this.type,Math.round(this.x+(Math.random() - 0.5 )*48),Math.floor(this.y+(Math.random() - 0.5)*48),this.energy)
+			else if (rand > 0.025)
+				new PoisonPlant("yellow",Math.round(this.x+(Math.random() - 0.5 )*64),Math.floor(this.y+(Math.random() - 0.5)*64),this.energy)
+			else 
+				new Herbi ("blue",Math.round(this.x+(Math.random() - 0.5 )*64),Math.floor(this.y+(Math.random() - 0.5)*64),this.energy)
 			}            
 			this.energy -= 90
         }
 	}
 }
+
+class PoisonPlant extends Plant{
+constructor (type,x,y,birthmark) {
+        if (['yellow'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Plant-Creature type`)
+		
+		var result = super(type,x,y,birthmark)
+		if(!result) return false
+
+        this.energy = 35
+		
+		//this.generateShade()
+    }
+    eat () {
+			this.energy += (11 - this.shade.length*3) // mmm solar power			
+	}
+    reproduce () {
+        if (this.energy > 120) { var rand = Math.random() * 100
+			{if(rand > 2) 
+	            new PoisonPlant(this.type,Math.round(this.x+(Math.random() - 0.5 )*128),Math.floor(this.y+(Math.random() - 0.5)*128),this.energy)
+			else if (rand > 0.01)
+				new Plant("green",Math.round(this.x+(Math.random() - 0.5 )*64),Math.floor(this.y+(Math.random() - 0.5)*64),this.energy)
+			else 
+				new Herbi ("blue",Math.round(this.x+(Math.random() - 0.5 )*64),Math.floor(this.y+(Math.random() - 0.5)*64),this.energy)
+			}            
+			this.energy -= 90
+        }
+	}
+}
+
+
