@@ -7,10 +7,10 @@
 <script src="Communities.js"></script>
 <script>
 "use strict";
-var CanvasSize = 800
+var CanvasSize = 400
 var mainNeighbourhood = []
 var n,m, pixelsPerCommunity
-n = m = 6
+n = m = 4
 pixelsPerCommunity = CanvasSize/n;
 
 for(var i = 0; i < n; i++){
@@ -75,6 +75,7 @@ Canvas.drawCommunity = function (community) {
 }
 
 Canvas.go = function () { 
+	Canvas.goButton.innerHTML = "Stop"
 	this.Interval = setInterval(() => {
     Canvas.GetAll(mainNeighbourhood).forEach(creature => creature.step())  
 	},1000/60)
@@ -84,15 +85,16 @@ Canvas.go = function () {
 }
 
 Canvas.stop = function () { 
+		Canvas.goButton.innerHTML = "Go"
 		clearInterval(this.Interval)
-		clearInterval(this.ReDrawInterval)
+//		clearInterval(this.ReDrawInterval)
 	this.Drawing = false
 }
 
 Canvas.toggledraw = function () {
 	if(Canvas.Drawing == undefined || Canvas.Drawing == false)
-		 {Canvas.go(); Canvas.goButton.innerHTML = "Stop"}
-	else {Canvas.stop(); Canvas.goButton.innerHTML = "Go"}
+		 { Canvas.go() }
+	else { Canvas.stop() }
 }
 Canvas.tick = function (timestamp) {
 		
@@ -118,6 +120,8 @@ window.onload = function () {
 	Canvas.goButton = document.createElement("Button")
 	Canvas.goButton.innerHTML = "Go"
 	document.body.appendChild(Canvas.goButton)
+
+	document.body.appendChild(document.createElement("Br"))
 
 	Canvas.goButton.addEventListener("click", Canvas.toggledraw)
 
