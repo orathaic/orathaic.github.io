@@ -44,3 +44,4 @@ class Community {
 	  toString () {
         return `This community: : ${this.x},${this.y} with ${this.creatures['green'].length} Plants and ${this.creatures['blue'].length} Herbivores. (${this.upperBound}, ${this.lowerBound}, ${this.rightBound}, ${this.leftBound})`
 	}
+}

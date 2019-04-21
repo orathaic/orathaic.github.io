@@ -1,0 +1,217 @@
+
+<!doctype html>
+<style>
+:root {background:#111;color:#eee;white-space:pre}
+/*#Canvas {height: 100%; width: 100%}*/
+</style>
+<script src="Creature_evo.js"></script>
+<script src="Communities.js"></script>
+<script>
+"use strict";
+var CanvasSize = 600
+var mainNeighbourhood = []
+var n,m, pixelsPerCommunity
+n = m = 2
+pixelsPerCommunity = CanvasSize/n;
+
+for(var i = 0; i < n; i++){
+	for(var j = 0; j < m; j++){
+
+		mainNeighbourhood[(i*n+j)] = new Community(i,j,mainNeighbourhood, pixelsPerCommunity) 
+	}
+}
+
+for (var i = 0; i < 1; i++) {
+    new Plant(
+		'green'
+       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+		,90
+    )
+    new Herbi(
+		'blue'
+       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+    )
+}
+
+
+var Canvas = { drawComBool: false};
+Canvas.Neighbourhood = mainNeighbourhood;
+Canvas.targetCreature = undefined
+
+
+
+Canvas.addHerbi = function() {
+   new Herbi(
+		'blue'
+       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+		)
+
+}
+
+Canvas.GetAll = function (Neighbourhood) {
+		return Neighbourhood.reduce( (allCreatures, Community) =>  allCreatures.concat(Community.getCreatures()) ,[])
+}
+
+Canvas.redraw = function (Creatures) {
+	if(!this.CanvasEL)
+		{this.CanvasEL = document.getElementById("Canvas");} 
+
+	var ctx = this.CanvasEL.getContext("2d");
+	ctx.clearRect(0, 0, this.CanvasEL.width, this.CanvasEL.height);
+
+	for(var i =0, l =Creatures.length; i < l; i++)
+		 { // Draw loop
+			Creature = Creatures[i];
+			ctx.beginPath();
+			ctx.arc(Creature.x,Creature.y,Math.max(Creature.size/10,1.5),0,6.283185307179586); // 6.283185307179586 is 2 * Math.PI 
+			ctx.fillStyle = Creature.type;
+			ctx.fill();
+		 }
+
+	if(this.drawComBool == true) this.drawCommunities(this.Neighbourhood)
+	if(Canvas.targetCreature != undefined)	{ Canvas.updateInfoDiv(Canvas.targetCreature, Canvas.infoDiv) }
+}
+
+Canvas.drawCom = function (B) {this.drawComBool = B}
+
+Canvas.drawCommunities = function (neighbourhood) {
+	for(var i = 0, l = neighbourhood.length; i < l; i++) {Canvas.drawCommunity(neighbourhood[i])}
+}
+
+Canvas.drawCommunity = function (community) {
+	var c = document.getElementById("Canvas")
+	var ctx = c.getContext("2d")
+	ctx.beginPath()
+	ctx.moveTo(community.lowerBound,community.leftBound)
+	ctx.lineTo(community.upperBound,community.leftBound)
+	ctx.lineTo(community.upperBound,community.rightBound)
+	ctx.lineTo(community.lowerBound,community.rightBound)
+	ctx.lineTo(community.lowerBound,community.leftBound)
+	ctx.strokeStyle = "Yellow"
+	ctx.stroke()
+}
+
+Canvas.takeOneStep = function () {
+	Canvas.GetAll(mainNeighbourhood).forEach(creature => creature.step())  
+	
+	Canvas.redraw( Canvas.GetAll(mainNeighbourhood) )
+}
+
+Canvas.go = function () { 
+	this.Interval = setInterval(() => {
+    Canvas.GetAll(mainNeighbourhood).forEach(creature => creature.step())  
+	},1000/60)
+	
+	this.Drawing = true
+	requestAnimationFrame(Canvas.tick);
+	Canvas.goButton.innerHTML = "Stop"
+}
+
+Canvas.stop = function () { 
+	clearInterval(this.Interval)
+	this.Drawing = false
+	Canvas.goButton.innerHTML = "Go"
+}
+
+Canvas.toggledraw = function () {
+	if(Canvas.Drawing == undefined || Canvas.Drawing == false)
+		 {Canvas.go();}
+	else {Canvas.stop();}
+}
+
+Canvas.tick = function (timestamp) {
+		if (!Canvas.start) Canvas.start = timestamp;
+			var progress = timestamp - Canvas.start;
+		if(progress > 60) { 
+			Canvas.redraw( Canvas.GetAll(mainNeighbourhood) )
+		}
+	if(Canvas.Drawing) window.requestAnimationFrame(Canvas.tick);
+}
+
+Canvas.GetInfo = function (infoDiv, event) {
+	var CanvasRectangle = Canvas.CanvasEL.getBoundingClientRect()
+	var targetCreature = Canvas.getCreatureByLoc(event.clientX - CanvasRectangle.left, event.clientY - CanvasRectangle.top)
+//	console.log(targetCreature)
+	if(targetCreature == undefined)
+	{ infoDiv.innerHTML = "No creature found."}
+	else { Canvas.targetCreature = targetCreature
+		  Canvas.updateInfoDiv(targetCreature, infoDiv)
+		}
+	infoDiv.style.display = "block"
+	infoDiv.style.left = (event.clientX + 10)+ "px" 
+	infoDiv.style.top = (event.clientY +10 + window.scrollY) + "px"
+
+}
+
+Canvas.updateInfoDiv = function (targetCreature, infoDiv = Canvas.infoDiv) {
+	
+		infoDiv.innerHTML = `Creaure: ${targetCreature.type} \n`
+						+`Size: ${targetCreature.size/10} \n`
+						+`Energy: ${targetCreature.energy} \n`
+						+`Shaded by: ${targetCreature.shade.length} \n`
+						+`Breed When: ${targetCreature.MinToReproduce} \n`
+						+`Energy to offspring: ${targetCreature.offSpringEnergy} \n`
+						+`Spawn max Distance: ${targetCreature.spawnMaxDistance} \n`
+	}
+
+Canvas.getCreatureByLoc = function (x, y) {
+	var allCreatures = Canvas.GetAll(mainNeighbourhood)
+	for(var i=0; i< allCreatures.length; i++)	
+	{ if (Math.abs(allCreatures[i].x - x) < (allCreatures[i].size/10)+1  && Math.abs(allCreatures[i].y - y) < (allCreatures[i].size/10)+1)
+		{ return allCreatures[i] }
+	}
+
+}
+
+document.onkeypress = function () { 
+		switch(event.which) { 
+		case 103: Canvas.go(); break;
+		case 115: Canvas.stop(); break;
+		default:
+		}
+}
+
+window.onload = function () {
+	document.body.textContent = "Press (G)o to begin simulation \nAnd to (S)top or pause simulation\n"
+
+	Canvas.goButton = document.createElement("Button")
+	Canvas.goButton.innerHTML = "Go"
+	document.body.appendChild(Canvas.goButton)
+
+	Canvas.stepButton = document.createElement("Button")
+	Canvas.stepButton.innerHTML = "Step"
+	document.body.appendChild(Canvas.stepButton)
+
+	Canvas.HerbiButton = document.createElement("Button")
+	Canvas.HerbiButton.innerHTML = "Add a Herbivore"
+	document.body.appendChild(Canvas.HerbiButton)
+
+	document.body.appendChild( document.createElement("br"))
+
+	Canvas.goButton.addEventListener("click", Canvas.toggledraw)
+
+	Canvas.stepButton.addEventListener("click", Canvas.takeOneStep)
+
+	Canvas.HerbiButton.addEventListener("click", Canvas.addHerbi)
+
+
+	var C = document.createElement("Canvas")
+	C.id = "Canvas"
+	C.setAttribute("height", CanvasSize);
+	C.setAttribute("width", CanvasSize);
+	document.body.appendChild(C)
+	Canvas.CanvasEL = C;
+
+	C.addEventListener("click", function() {Canvas.GetInfo(Canvas.infoDiv, event) })
+
+	Canvas.infoDiv = document.createElement("div")
+
+	Canvas.infoDiv.style.cssText = "display:none; position:absolute; z-index:4; opacity: 0.7;"
+
+	document.body.appendChild(Canvas.infoDiv)
+}
+</script>
+
