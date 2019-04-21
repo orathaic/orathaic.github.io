@@ -7,6 +7,7 @@
 .green { background-color: green;}
 .red { background-color: red;}
 .blue { background-color: blue;}
+.yellow { background-color: yellow;}
 
 </style>
 <script src="Creature.js"></script>
@@ -37,9 +38,8 @@ for(var i = 0; i < 7; i++) {
 
 for(var i = 0; i < 7; i++) {
     new Plant(
-        mainNeighbourhood[3]
        	//,['red','green','blue'][Math.floor(Math.random()*3)]
-		,'green'
+		'green'
        	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
        	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
     )
