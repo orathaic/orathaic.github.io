@@ -55,7 +55,7 @@ class Creature {
         else {
             this.energy -= 1
         }
-        if (this.energy < -100) {
+        if (this.energy < -20) {
             this.die()
         }
     }
@@ -114,6 +114,10 @@ class Creature {
 				next = this.findCommunity(this.community.x, this.community.y - range - 1) 
 				if(next) targetArray.push(next)
 			}
+	}
+	getCreatureInfo ()
+	{
+		return "Base Creature - info not implemented."
 	}
 }
 
@@ -223,7 +227,7 @@ class Plant extends Creature {
 
 	grow () {
 	 this.size += 2
-	 this.energy -= 10
+	 this.energy -= 20
 	}
 
     move ( ) {
@@ -262,7 +266,7 @@ class Plant extends Creature {
 						this.type
 						,Math.round(this.x+(Math.random() - 0.5 )*this.spawnMaxDistance)
 						,Math.floor(this.y+(Math.random() - 0.5)*this.spawnMaxDistance)
-						,this.offSpringEnergy
+						,this.offSpringEnergy // this is how much energy you give your offspring, we mutate that energy they will give their offspring.
 						,this.moveDistance //0
 						,this.range //12
 						, ...mutant
@@ -271,6 +275,16 @@ class Plant extends Creature {
 	}           
 			this.energy -= this.offSpringEnergy
         }
+	}
+
+	getCreatureInfo () { var targetCreature = this
+				return	`Creaure: ${targetCreature.type} \n`
+						+`Size: ${targetCreature.size/10} \n`
+						+`Energy: ${targetCreature.energy} \n`
+						+`Shaded by: ${targetCreature.shade.length} \n`
+						+`Breed When: ${targetCreature.MinToReproduce} \n`
+						+`Energy to offspring: ${targetCreature.offSpringEnergy} \n`
+						+`Spawn max Distance: ${targetCreature.spawnMaxDistance} \n`
 	}
 }
 

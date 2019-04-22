@@ -131,30 +131,30 @@ Canvas.tick = function (timestamp) {
 	if(Canvas.Drawing) window.requestAnimationFrame(Canvas.tick);
 }
 
-Canvas.GetInfo = function (infoDiv, event) {
+Canvas.GetInfo = function (infoDivContainer, event) {
 	var CanvasRectangle = Canvas.CanvasEL.getBoundingClientRect()
 	var targetCreature = Canvas.getCreatureByLoc(event.clientX - CanvasRectangle.left, event.clientY - CanvasRectangle.top)
+
+	var infoDiv = Canvas.infoDiv
+
 //	console.log(targetCreature)
 	if(targetCreature == undefined)
-	{ infoDiv.innerHTML = "No creature found."}
+	{
+		Canvas.infoDiv.innerHTML = "No creature found."
+		Canvas.targetCreature = undefined
+	}
 	else { Canvas.targetCreature = targetCreature
 		  Canvas.updateInfoDiv(targetCreature, infoDiv)
 		}
-	infoDiv.style.display = "block"
-	infoDiv.style.left = (event.clientX + 10)+ "px" 
-	infoDiv.style.top = (event.clientY +10 + window.scrollY) + "px"
+	infoDivContainer.style.display = "block"
+	infoDivContainer.style.left = (event.clientX + 10)+ "px" 
+	infoDivContainer.style.top = (event.clientY +10 + window.scrollY) + "px"
 
 }
 
 Canvas.updateInfoDiv = function (targetCreature, infoDiv = Canvas.infoDiv) {
 	
-		infoDiv.innerHTML = `Creaure: ${targetCreature.type} \n`
-						+`Size: ${targetCreature.size/10} \n`
-						+`Energy: ${targetCreature.energy} \n`
-						+`Shaded by: ${targetCreature.shade.length} \n`
-						+`Breed When: ${targetCreature.MinToReproduce} \n`
-						+`Energy to offspring: ${targetCreature.offSpringEnergy} \n`
-						+`Spawn max Distance: ${targetCreature.spawnMaxDistance} \n`
+		infoDiv.innerHTML = targetCreature.getCreatureInfo()
 	}
 
 Canvas.getCreatureByLoc = function (x, y) {
@@ -205,13 +205,28 @@ window.onload = function () {
 	document.body.appendChild(C)
 	Canvas.CanvasEL = C;
 
-	C.addEventListener("click", function() {Canvas.GetInfo(Canvas.infoDiv, event) })
+	C.addEventListener("click", function() {Canvas.GetInfo(Canvas.infoDivContainer, event) })
+
+	Canvas.infoDivContainer = document.createElement("div")
+
+	Canvas.infoDivContainer.style.cssText = "display:none; position:absolute; z-index:4; opacity: 0.6; background-color:grey; border-radius:15px; padding:5px"
+
+	document.body.appendChild(Canvas.infoDivContainer)
+	
+	Canvas.infoDivContainer.CloseButton = document.createElement("div")
+
+	Canvas.infoDivContainer.CloseButton.style.cssText = "float:right; margin-top:10px; margin-right:10px;"
+
+	Canvas.infoDivContainer.CloseButton.textContent = "X"
+
+	document.body.lastChild.appendChild(Canvas.infoDivContainer.CloseButton)
 
 	Canvas.infoDiv = document.createElement("div")
 
-	Canvas.infoDiv.style.cssText = "display:none; position:absolute; z-index:4; opacity: 0.7;"
+	document.body.lastChild.appendChild(Canvas.infoDiv)
 
-	document.body.appendChild(Canvas.infoDiv)
+
+
 }
 </script>
 
