@@ -212,6 +212,13 @@ window.onload = function () {
 	Canvas.infoDiv.style.cssText = "display:none; position:absolute; z-index:4; opacity: 0.7;"
 
 	document.body.appendChild(Canvas.infoDiv)
+
+if (typeof(Storage) !== "undefined") {
+   alert("Found local storage") 
+} else {
+ alert("No local storage found") 
+    
+}
 }
 </script>
 
