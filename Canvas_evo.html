@@ -148,13 +148,13 @@ Canvas.GetInfo = function (infoDiv, event) {
 
 Canvas.updateInfoDiv = function (targetCreature, infoDiv = Canvas.infoDiv) {
 	
-		infoDiv.innerHTML = `Creaure: ${targetCreature.type} \n`
+		infoDiv.innerHTML = /*`Creaure: ${targetCreature.type} \n`
 						+`Size: ${targetCreature.size/10} \n`
 						+`Energy: ${targetCreature.energy} \n`
 						+`Shaded by: ${targetCreature.shade.length} \n`
 						+`Breed When: ${targetCreature.MinToReproduce} \n`
 						+`Energy to offspring: ${targetCreature.offSpringEnergy} \n`
-						+`Spawn max Distance: ${targetCreature.spawnMaxDistance} \n`
+						+`Spawn max Distance: ${targetCreature.spawnMaxDistance} \n`*/
 	}
 
 Canvas.getCreatureByLoc = function (x, y) {
@@ -163,6 +163,10 @@ Canvas.getCreatureByLoc = function (x, y) {
 	{ if (Math.abs(allCreatures[i].x - x) < (allCreatures[i].size/10)+1  && Math.abs(allCreatures[i].y - y) < (allCreatures[i].size/10)+1)
 		{ return allCreatures[i] }
 	}
+
+}
+
+Canvas.recordState = function() {
 
 }
 
@@ -214,11 +218,14 @@ window.onload = function () {
 	document.body.appendChild(Canvas.infoDiv)
 
 if (typeof(Storage) !== "undefined") {
-   alert("Found local storage") 
+   Canvas.Storage = Storage 
 } else {
- alert("No local storage found") 
-    
+ console.log("No local storage found") 
+    Canvas.Storage = undefined
 }
+  
+  Canvas.addEventListener("unload", Canvas.recordState)
+
 }
 </script>
 
