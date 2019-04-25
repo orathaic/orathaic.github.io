@@ -21,6 +21,11 @@ for(var i = 0; i < n; i++){
 	}
 }
 
+  if( localStorage.getItem('creatures') )
+  { alert('local Storage exists') 
+    //JSON.parse(localStorage.getItem('items'))
+  } 
+  else{
 for (var i = 0; i < 1; i++) {
     new Plant(
 		'green'
@@ -28,12 +33,8 @@ for (var i = 0; i < 1; i++) {
        	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
 		,90
     )
-    new Herbi(
-		'blue'
-       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
-       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
-    )
-}
+   }
+  } 
 
 
 var Canvas = { drawComBool: false};
@@ -167,7 +168,11 @@ Canvas.getCreatureByLoc = function (x, y) {
 }
 
 Canvas.recordState = function() {
-
+  if(Canvas.Storage! =undefined)
+   
+  {
+ localStorage.setItem('Creatures', JSON.stringify(Canvas.GetAll(mainNeighbourhood)))
+  } 
 }
 
 document.onkeypress = function () { 
