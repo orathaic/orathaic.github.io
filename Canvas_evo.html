@@ -1,4 +1,3 @@
-
 <!doctype html>
 <style>
 :root {background:#111;color:#eee;white-space:pre}
@@ -8,6 +7,8 @@
 <script src="Communities.js"></script>
 <script>
 "use strict";
+// handle circular object references
+
 var CanvasSize = 600
 var mainNeighbourhood = []
 var n,m, pixelsPerCommunity
@@ -21,6 +22,11 @@ for(var i = 0; i < n; i++){
 	}
 }
 
+  if( window.localStorage.getItem('creatures') )
+  { alert('local Storage exists') 
+    //JSON.parse(localStorage.getItem('creatures'))
+  } 
+  else{
 for (var i = 0; i < 1; i++) {
     new Plant(
 		'green'
@@ -166,6 +172,16 @@ Canvas.getCreatureByLoc = function (x, y) {
 
 }
 
+Canvas.recordState = function() {
+  console.log('in recordState') 
+  
+  if(Canvas.Storage != undefined)
+   
+  {
+ localStorage.setItem('Creatures', JSON.stringify(Canvas.GetAll(mainNeighbourhood)))
+  } 
+}
+
 document.onkeypress = function () { 
 		switch(event.which) { 
 		case 103: Canvas.go(); break;
@@ -225,7 +241,19 @@ window.onload = function () {
 
 	document.body.lastChild.appendChild(Canvas.infoDiv)
 
+	document.body.appendChild(Canvas.infoDiv)
 
+if (typeof(Storage) !== "undefined") {
+console.log('storage supported')
+   Canvas.Storage = Storage 
+   
+} else {
+ console.log("No local storage found") 
+    Canvas.Storage = undefined
+}
+  
+  
+document.body.addEventListener("unload", Canvas.recordState)
 
 }
 </script>
