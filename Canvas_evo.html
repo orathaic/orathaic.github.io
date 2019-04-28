@@ -1,13 +1,14 @@
 <!doctype html>
 <style>
 :root {background:#111;color:#eee;white-space:pre}
+div.bgbox {display:none; position:absolute; z-index:4; opacity: 0.6; background-color:grey; border-radius:15px; padding:5px }
+div.close {float:right; margin-top:10px; margin-right:10px;}
 /*#Canvas {height: 100%; width: 100%}*/
 </style>
 <script src="Creature_evo.js"></script>
 <script src="Communities.js"></script>
 <script>
 "use strict";
-// handle circular object references
 
 var CanvasSize = 600
 var mainNeighbourhood = []
@@ -22,31 +23,56 @@ for(var i = 0; i < n; i++){
 	}
 }
 
-  if( window.localStorage.getItem('creatures') )
-  { alert('local Storage exists') 
-    //JSON.parse(localStorage.getItem('creatures'))
-  } 
-  else{
-for (var i = 0; i < 1; i++) {
-    new Plant(
-		'green'
-       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
-       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
-		,90
-    )
-    new Herbi(
-		'blue'
-       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
-       	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
-    )
+ if( window.localStorage.getItem('creatures') )
+	  { 
+		var creatureArray = JSON.parse(localStorage.getItem('creatures'))
+
+		for(var i=0, l = creatureArray.length; i<l; i++)
+		{	var creature = creatureArray[i]
+			if(creature.type == "green")	new Plant (creature.type
+					,creature.x, creature.y, creature.energy + 1, creature.moveDistance
+					,creature.range
+					,creature.size
+					,creature.MinToReproduce
+					,creature.offSpringEnergy
+					,creature.offSpringSize
+					,creature.spawnMaxDistance
+					,creature.mutationRate
+					)
+		
+			else if(creature.type == "blue")	new Herbi (creature.type
+					,creature.x, creature.y, creature.energy + 1
+/*					,creature.moveDistance
+					,creature.range
+					,creature.MinToReproduce
+					,creature.offSpringEnergy
+					,creature.size
+					,creature.spawnMaxDistance
+					,creature.mutationRate*/
+					)
+		}
+	  } 
+ else
+	{
+	for (var i = 0; i < 1; i++) {
+		new Plant(
+			'green'
+		   	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+		   	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+			,90
+		)
+		new Herbi(
+			'blue'
+		   	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+		   	,Math.floor(pixelsPerCommunity*Math.random())+pixelsPerCommunity
+		)
+	}
 }
 
 
 var Canvas = { drawComBool: false};
 Canvas.Neighbourhood = mainNeighbourhood;
 Canvas.targetCreature = undefined
-
-
 
 Canvas.addHerbi = function() {
    new Herbi(
@@ -161,7 +187,7 @@ Canvas.GetInfo = function (infoDivContainer, event) {
 Canvas.updateInfoDiv = function (targetCreature, infoDiv = Canvas.infoDiv) {
 	
 		infoDiv.innerHTML = targetCreature.getCreatureInfo()
-	}
+}
 
 Canvas.getCreatureByLoc = function (x, y) {
 	var allCreatures = Canvas.GetAll(mainNeighbourhood)
@@ -173,13 +199,18 @@ Canvas.getCreatureByLoc = function (x, y) {
 }
 
 Canvas.recordState = function() {
-  console.log('in recordState') 
-  
-  if(Canvas.Storage != undefined)
+	  
+  if(typeof(Storage) !== "undefined")
    
-  {
- localStorage.setItem('Creatures', JSON.stringify(Canvas.GetAll(mainNeighbourhood)))
-  } 
+  { var creatureString = '['
+	var creatureArray = Canvas.GetAll(mainNeighbourhood)
+	for(let creature in creatureArray) { creatureString += creatureArray[creature].creatureStringify()+ ","}
+		
+	creatureString = creatureString.replace(/,\s*$/, ""); 
+	creatureString += ']'
+	localStorage.setItem('creatures', creatureString )
+	console.log("in unload: "+creatureString)
+  } else {console.log("no storage found.")}
 }
 
 document.onkeypress = function () { 
@@ -206,13 +237,9 @@ window.onload = function () {
 	document.body.appendChild(Canvas.HerbiButton)
 
 	document.body.appendChild( document.createElement("br"))
-
 	Canvas.goButton.addEventListener("click", Canvas.toggledraw)
-
 	Canvas.stepButton.addEventListener("click", Canvas.takeOneStep)
-
 	Canvas.HerbiButton.addEventListener("click", Canvas.addHerbi)
-
 
 	var C = document.createElement("Canvas")
 	C.id = "Canvas"
@@ -224,37 +251,19 @@ window.onload = function () {
 	C.addEventListener("click", function() {Canvas.GetInfo(Canvas.infoDivContainer, event) })
 
 	Canvas.infoDivContainer = document.createElement("div")
-
-	Canvas.infoDivContainer.style.cssText = "display:none; position:absolute; z-index:4; opacity: 0.6; background-color:grey; border-radius:15px; padding:5px"
-
+	Canvas.infoDivContainer.className = "bgbox"
 	document.body.appendChild(Canvas.infoDivContainer)
 	
 	Canvas.infoDivContainer.CloseButton = document.createElement("div")
-
-	Canvas.infoDivContainer.CloseButton.style.cssText = "float:right; margin-top:10px; margin-right:10px;"
-
-	Canvas.infoDivContainer.CloseButton.textContent = "X"
-
+	Canvas.infoDivContainer.CloseButton.className = "close"
+	Canvas.infoDivContainer.CloseButton.textContent = "x"
 	document.body.lastChild.appendChild(Canvas.infoDivContainer.CloseButton)
 
 	Canvas.infoDiv = document.createElement("div")
-
 	document.body.lastChild.appendChild(Canvas.infoDiv)
 
-	document.body.appendChild(Canvas.infoDiv)
+	Canvas.redraw( Canvas.GetAll(mainNeighbourhood) ) 
 
-if (typeof(Storage) !== "undefined") {
-console.log('storage supported')
-   Canvas.Storage = Storage 
-   
-} else {
- console.log("No local storage found") 
-    Canvas.Storage = undefined
-}
-  
-  
-document.body.addEventListener("unload", Canvas.recordState)
-
+	document.body.addEventListener("unload", Canvas.recordState())
 }
 </script>
-

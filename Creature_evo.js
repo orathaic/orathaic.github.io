@@ -119,6 +119,11 @@ class Creature {
 	{
 		return "Base Creature - info not implemented."
 	}
+	creatureStringify()
+	{
+		return `"type":"${this.type}","moveDistance":${this.moveDistance},"x":${this.x},"y":${this.y}`
+	}
+
 }
 
 class Herbi extends Creature {
@@ -161,10 +166,16 @@ class Herbi extends Creature {
 			}
         }
     }
+
+		creatureStringify()
+	{
+		
+		return `{` + super.creatureStringify()+`,"energy":${this.energy}}`
+	}
 }
 
 class Plant extends Creature {
-    constructor (type,x,y,birthmark, moveDistance = 0, range = 12, MinToReproduce = 120, offSpringEnergy = 45, size = 10, spawnMaxDistance = 48, mutationRate = 2) {
+    constructor (type,x,y,birthmark, moveDistance = 0, range = 12, size = 10, MinToReproduce = 120, offSpringEnergy = 45, offSpringSize = 10, spawnMaxDistance = 48, mutationRate = 2) {
         if (['green', 'yellow'].indexOf(type) < 0) throw new TypeError(`type: ${type} is not a valid Plant-Creature type`)
 		
 		var result = super(type,x,y,birthmark)
@@ -179,8 +190,9 @@ class Plant extends Creature {
 
 		this.MinToReproduce = MinToReproduce
 		this.offSpringEnergy = offSpringEnergy
+		this.offSpringSize = offSpringSize // TODO: make this cost more energy!
 //		this.efficiency = 1.5 // efficiency should be an emergent quality.
-		this.size = 10
+		this.size = size
 		this.spawnMaxDistance = spawnMaxDistance
 		this.mutationRate = 2 // as a percentage
 
@@ -249,14 +261,15 @@ class Plant extends Creature {
 						,this.offSpringEnergy
 						,this.moveDistance 
 						,this.range 
+						,this.offSpringSize
 						,this.MinToReproduce 
 						,this.offSpringEnergy 
-						,this.size 
+						,this.offSpringSize // for the offspring's offspring 
 						,this.spawnMaxDistance
 						,this.mutationRate 
 						)
 				else
-				{	var mutant = [this.MinToReproduce, this.offSpringEnergy, this.size, this.spawnMaxDistance, this.mutationRate]
+				{	var mutant = [this.MinToReproduce, this.offSpringEnergy, this.offSpringSize, this.spawnMaxDistance, this.mutationRate]
 					rand *= 5
 					for(var i =0; i<this.mutationRate*5; i+= 1 )
 					{
@@ -268,7 +281,8 @@ class Plant extends Creature {
 						,Math.floor(this.y+(Math.random() - 0.5)*this.spawnMaxDistance)
 						,this.offSpringEnergy // this is how much energy you give your offspring, we mutate that energy they will give their offspring.
 						,this.moveDistance //0
-						,this.range //12
+						,this.range //12 
+						,this.offSpringSize
 						, ...mutant
 						)
 				} 
@@ -285,7 +299,15 @@ class Plant extends Creature {
 						+`Breed When: ${targetCreature.MinToReproduce} \n`
 						+`Energy to offspring: ${targetCreature.offSpringEnergy} \n`
 						+`Spawn max Distance: ${targetCreature.spawnMaxDistance} \n`
+						+`Offspring size: ${targetCreature.offSpringSize} \n`
 	}
+
+	creatureStringify()
+	{
+		
+		return `{` + super.creatureStringify()+`,"energy":${this.energy},"range":${this.range},"minToReproduce":${this.MinToReproduce},"offSpringEnergy":${this.offSpringEnergy}, "offSpringSize":${this.offSpringSize},"size":${this.size},"spawnDistance":${this.spawnMaxDistance},"mutationRate":${this.mutationRate} }`
+	}
+
 }
 
 
