@@ -24,7 +24,7 @@ for(var i = 0; i < n; i++){
 }
 
  if( window.localStorage.getItem('creatures') )
-	  { 
+	  { //console.log('getting items from ls')
 		var creatureArray = JSON.parse(localStorage.getItem('creatures'))
 
 		for(var i=0, l = creatureArray.length; i<l; i++)
@@ -202,15 +202,17 @@ Canvas.recordState = function() {
 	  
   if(typeof(Storage) !== "undefined")
    
-  { var creatureString = '['
+  { localStorage.removeItem('creatures')
+	var creatureString = '['
 	var creatureArray = Canvas.GetAll(mainNeighbourhood)
 	for(let creature in creatureArray) { creatureString += creatureArray[creature].creatureStringify()+ ","}
 		
 	creatureString = creatureString.replace(/,\s*$/, ""); 
 	creatureString += ']'
 	localStorage.setItem('creatures', creatureString )
-	console.log("in unload: "+creatureString)
-  } else {console.log("no storage found.")}
+	//console.log("in record state.")
+	return null
+  } else {console.log("no storage found."); return "no localstorage found."}
 }
 
 document.onkeypress = function () { 
@@ -264,6 +266,7 @@ window.onload = function () {
 
 	Canvas.redraw( Canvas.GetAll(mainNeighbourhood) ) 
 
-	document.body.addEventListener("unload", Canvas.recordState())
+//	document.body.addEventListener("beforeunload", Canvas.recordState)
+	window.onbeforeunload = function() { return Canvas.recordState(); }
 }
 </script>
