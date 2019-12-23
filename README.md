@@ -1,11 +1,9 @@
-# EcoSim
+# Trial By Fire
 
-EcoSim, based on phyton project, re-written for the web.
+Trial By Fire, deck building game, multiplayer, inspired by Slay the Spire.
 
-Current implementations in [Canvas](./Canvas_test.html), [SVG](./Svg_test.html), [Dom elements](./Simon.html).
+(EcoSim is no longer hosted here: [Github->EcoSim](https://github.com/orathaic/EcoSim),)
 
-Eco_evolution implementation [Canvas](./Canvas_evo.html),
-
-Currently working on ~~webGL, asm.js, and multi-dimensional array optimisations~~ adding random mutation to plants, and neural network style decision making for animals.
+Currently working on first pass implementation.
 
 -orathaic
