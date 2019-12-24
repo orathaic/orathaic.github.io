@@ -1,11 +1,52 @@
 <!doctype html>
 <style>
 :root {background:#111;color:#eee;white-space:pre}
+button { width:33%; font-size: 5vw}
 </style>
+<script src="Lobby.js"></script>
+<script src="Functions.js"></script>
 <script>
+"user strict";
+JoinLobby = function() {
+	var Lobby = document.Lobby || new Room("Lobby")
+	var n = Lobby.Users.length;
+	var name = 	window.prompt('Enter name', 'user'+n)
+	Lobby.addUser(name)
+//	console.log(name)
+	Lobby.display()
+}	
+
+window.onload = function () {
+	console.log(window.screen.availWidth)
+		if(window.screen.availWidth < 600)
+		{ document.documentElement.style.setProperty('font-size', '20vw');
+			
+		}
+	MenuDiv = document.createElement("div")
+	MenuDiv.setAttribute("id","Menu")	
+	document.body.appendChild(MenuDiv)
+	
+	LobbyButton = document.createElement("Button")
+	LobbyButton.setAttribute("id","JoinLobby")	
+	LobbyButton.innerHTML = "Join Lobby"
+	MenuDiv.appendChild(LobbyButton)
+
+	LobbyButton2 = document.createElement("Button")
+	LobbyButton2.innerHTML = "test button"
+	MenuDiv.appendChild(LobbyButton2)
+
+	LobbyButton3 = document.createElement("Button")
+	LobbyButton3.innerHTML = "test button"
+	MenuDiv.appendChild(LobbyButton3)
+
+	LobbyDiv = document.createElement("div")
+	LobbyDiv.setAttribute("id","Lobby")	
+	document.body.appendChild(LobbyDiv)
+	LobbyDiv.innerHTML = "Test text;"
+	LobbyDiv.hide()
+
+	document.getElementById("JoinLobby").addEventListener("click", JoinLobby);
 
 
-
-
-window.onload = function () {document.body.textContent = "Test Text;"}
+	}
 </script>
