@@ -8,12 +8,12 @@ button { width:33%; font-size: 5vw}
 <script>
 "user strict";
 JoinLobby = function() {
-	var Lobby = document.Lobby || new Room("Lobby")
-	var n = Lobby.Users.length;
+	var TheLobby = document.Lobby || new Lobby("Lobby")
+	var n = TheLobby.Users.length;
 	var name = 	window.prompt('Enter name', 'user'+n)
-	Lobby.addUser(name)
+	TheLobby.addUser(name)
 //	console.log(name)
-	Lobby.display()
+	TheLobby.display()
 }	
 
 window.onload = function () {
